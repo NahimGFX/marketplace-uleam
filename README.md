@@ -28,7 +28,7 @@ colaboración entre los miembros de la comunidad universitaria.
 
 -   Go (Golang)
 -   REST API
--   PostgreSQL
+-   SQLite
 -   JSON
 -   Git
 
