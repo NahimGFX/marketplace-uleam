@@ -191,3 +191,15 @@ func (m *Memoria) ListarMissions() []models.Mission {
 	copy(copia, m.missions)
 	return copia
 }
+
+func (m *Memoria) BuscarMisionPorID(id int) (models.Mission, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, p := range m.missions {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.Mission{}, false
+}

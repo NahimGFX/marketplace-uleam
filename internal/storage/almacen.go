@@ -21,4 +21,5 @@ type Almacen interface {
 	BorrarMessage(id int) bool
 	//// Misiones
 	ListarMissions() []models.Mission
+	BuscarMisionPorID(id int) (models.Mission, bool)
 }

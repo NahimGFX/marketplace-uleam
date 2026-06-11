@@ -40,7 +40,8 @@ func main() {
 		r.Put("/amesa/{id}", servidor.ActualizarMessage)
 		r.Delete("/dmesa/{id}", servidor.BorrarMessage)
 		///missions
-		r.Get("/rmision", servidor.ListarMissions)
+		r.Get("/rmission", servidor.ListarMissions)
+		r.Get("/lmission/{id}", servidor.ObtenerMision)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")

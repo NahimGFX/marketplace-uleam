@@ -119,3 +119,20 @@ func (s *Server) ListarMissions(w http.ResponseWriter, _ *http.Request) {
 	missions := s.Storage.ListarMissions()
 	RespondJSON(w, http.StatusOK, missions)
 }
+
+// ObtenerMision atiende GET /api/v1/misiones/{id}.
+func (s *Server) ObtenerMision(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	mission, encontrado := s.Storage.BuscarMisionPorID(id)
+	if !encontrado {
+		RespondError(w, http.StatusNotFound, "misión no encontrada")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, mission)
+}
