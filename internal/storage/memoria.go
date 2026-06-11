@@ -15,6 +15,12 @@ type Memoria struct {
 	nextBadgeID  int
 
 	// MODULO 2
+	categorias      []models.Categoria
+	nextCategoriaID int
+	productos       []models.Producto
+	nextProductoID  int
+	orden           []models.Orden
+	nextOrdenID     int
 
 	// MODULO 3
 	messages          []models.Message
