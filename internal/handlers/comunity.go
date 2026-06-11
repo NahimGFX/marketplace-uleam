@@ -226,3 +226,97 @@ func (s *Server) BorrarMision(w http.ResponseWriter, r *http.Request) {
 
 	RespondJSON(w, http.StatusNoContent, nil)
 }
+
+// ListarUsermissions atiende GET /api/v1/usermissions.
+func (s *Server) ListarUsermissions(w http.ResponseWriter, _ *http.Request) {
+	usermissions := s.Storage.ListarUsermissions()
+	RespondJSON(w, http.StatusOK, usermissions)
+}
+
+// ObtenerUserMission atiende GET /api/v1/usermissions/{id}.
+func (s *Server) ObtenerUserMission(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	usermission, encontrado := s.Storage.BuscarUserMissionPorID(id)
+	if !encontrado {
+		RespondError(w, http.StatusNotFound, "misión no encontrada")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, usermission)
+}
+
+// CrearUserMission atiende POST /api/v1/usermissions.
+func (s *Server) CrearUserMission(w http.ResponseWriter, r *http.Request) {
+	var nuevo models.UserMission
+
+	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		return
+	}
+
+	if nuevo.UserID <= 0 {
+		RespondError(w, http.StatusBadRequest, "user_id es obligatorio")
+		return
+	}
+
+	if nuevo.MissionID <= 0 {
+		RespondError(w, http.StatusBadRequest, "mission_id es obligatorio")
+		return
+	}
+
+	creado := s.Storage.CrearUserMission(nuevo)
+	RespondJSON(w, http.StatusCreated, creado)
+}
+
+// ActualizarUserMission atiende PUT /api/v1/usermissions/{id}.
+func (s *Server) ActualizarUserMission(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	var datos models.UserMission
+	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		return
+	}
+	if datos.UserID <= 0 {
+		RespondError(w, http.StatusBadRequest, "user_id es obligatorio")
+		return
+	}
+
+	if datos.MissionID <= 0 {
+		RespondError(w, http.StatusBadRequest, "mission_id es obligatorio")
+		return
+	}
+
+	actualizado, encontrado := s.Storage.ActualizarUserMission(id, datos)
+	if !encontrado {
+		RespondError(w, http.StatusNotFound, "mensaje no encontrado")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, actualizado)
+}
+
+// BorrarUserMission atiende DELETE /api/v1/usermissions/{id}.
+func (s *Server) BorrarUserMission(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	if !s.Storage.BorrarUserMission(id) {
+		RespondError(w, http.StatusNotFound, "usermisión no encontrada")
+		return
+	}
+
+	RespondJSON(w, http.StatusNoContent, nil)
+}

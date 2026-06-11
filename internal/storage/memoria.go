@@ -526,3 +526,79 @@ func (m *Memoria) BorrarMision(id int) bool {
 	}
 	return false
 }
+
+// ///////entidad UserMission
+
+func (m *Memoria) SeedUsermissions() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.usermissions = []models.UserMission{
+		{ID: 1, UserID: 1, MissionID: 1, Completed: true},
+		{ID: 2, UserID: 2, MissionID: 1, Completed: true},
+		{ID: 3, UserID: 3, MissionID: 2, Completed: false},
+		{ID: 4, UserID: 4, MissionID: 3, Completed: true},
+		{ID: 5, UserID: 5, MissionID: 4, Completed: false},
+		{ID: 6, UserID: 6, MissionID: 5, Completed: true},
+		{ID: 7, UserID: 7, MissionID: 2, Completed: false},
+	}
+	m.nextUserMissionID = 8
+}
+func (m *Memoria) ListarUsermissions() []models.UserMission {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.UserMission, len(m.usermissions))
+	copy(copia, m.usermissions)
+	return copia
+}
+
+func (m *Memoria) BuscarUserMissionPorID(id int) (models.UserMission, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, p := range m.usermissions {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.UserMission{}, false
+}
+
+func (m *Memoria) CrearUserMission(p models.UserMission) models.UserMission {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	p.ID = m.nextUserMissionID
+	m.nextUserMissionID++
+	m.usermissions = append(m.usermissions, p)
+	return p
+}
+
+func (m *Memoria) ActualizarUserMission(id int, datos models.UserMission) (models.UserMission, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.usermissions {
+		if p.ID == id {
+			datos.ID = id
+			m.usermissions[i] = datos
+			return datos, true
+		}
+	}
+	return models.UserMission{}, false
+}
+
+// BorrarUserMission elimina la misión con el ID dado.
+func (m *Memoria) BorrarUserMission(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.usermissions {
+		if p.ID == id {
+			m.usermissions = append(m.usermissions[:i], m.usermissions[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
