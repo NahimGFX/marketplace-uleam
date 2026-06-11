@@ -272,3 +272,35 @@ func (s *Server) CrearUserMission(w http.ResponseWriter, r *http.Request) {
 	creado := s.Storage.CrearUserMission(nuevo)
 	RespondJSON(w, http.StatusCreated, creado)
 }
+
+// ActualizarUserMission atiende PUT /api/v1/usermissions/{id}.
+func (s *Server) ActualizarUserMission(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	var datos models.UserMission
+	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		return
+	}
+	if datos.UserID <= 0 {
+		RespondError(w, http.StatusBadRequest, "user_id es obligatorio")
+		return
+	}
+
+	if datos.MissionID <= 0 {
+		RespondError(w, http.StatusBadRequest, "mission_id es obligatorio")
+		return
+	}
+
+	actualizado, encontrado := s.Storage.ActualizarUserMission(id, datos)
+	if !encontrado {
+		RespondError(w, http.StatusNotFound, "mensaje no encontrado")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, actualizado)
+}
