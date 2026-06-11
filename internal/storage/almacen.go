@@ -22,4 +22,5 @@ type Almacen interface {
 	//// Misiones
 	ListarMissions() []models.Mission
 	BuscarMisionPorID(id int) (models.Mission, bool)
+	CrearMision(mission models.Mission) models.Mission
 }

@@ -136,3 +136,35 @@ func (s *Server) ObtenerMision(w http.ResponseWriter, r *http.Request) {
 
 	RespondJSON(w, http.StatusOK, mission)
 }
+
+// CrearMision atiende POST /api/v1/misiones.
+func (s *Server) CrearMision(w http.ResponseWriter, r *http.Request) {
+	var nuevo models.Mission
+
+	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		return
+	}
+
+	if strings.TrimSpace(nuevo.Title) == "" {
+		RespondError(w, http.StatusBadRequest, "el título es obligatorio")
+		return
+	}
+
+	if strings.TrimSpace(nuevo.Description) == "" {
+		RespondError(w, http.StatusBadRequest, "la descripción es obligatoria")
+		return
+	}
+
+	if nuevo.RequiredLevel < 1 {
+		RespondError(w, http.StatusBadRequest, "required_level debe ser mayor que 0")
+		return
+	}
+
+	if nuevo.RewardPoints <= 0 {
+		RespondError(w, http.StatusBadRequest, "reward_points debe ser mayor que 0")
+		return
+	}
+	creado := s.Storage.CrearMision(nuevo)
+	RespondJSON(w, http.StatusCreated, creado)
+}

@@ -203,3 +203,13 @@ func (m *Memoria) BuscarMisionPorID(id int) (models.Mission, bool) {
 	}
 	return models.Mission{}, false
 }
+
+func (m *Memoria) CrearMision(p models.Mission) models.Mission {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	p.ID = m.nextMissionID
+	m.nextMissionID++
+	m.missions = append(m.missions, p)
+	return p
+}
