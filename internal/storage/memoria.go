@@ -87,6 +87,7 @@ func (m *Memoria) ListarUsers() []models.User {
 // =========================================================
 // MODULO 3
 // =========================================================
+// ///////entidad Message
 func (m *Memoria) SeedMessages() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -163,4 +164,30 @@ func (m *Memoria) BorrarMessage(id int) bool {
 		}
 	}
 	return false
+}
+
+// ///////////entidad Mission
+func (m *Memoria) SeedMissions() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.missions = []models.Mission{
+		{ID: 1, Title: "Primera Publicación", Description: "Publica tu primer producto en el marketplace", RequiredLevel: 1, RewardPoints: 20},
+		{ID: 2, Title: "Primera Compra", Description: "Realiza tu primera compra dentro de la plataforma", RequiredLevel: 1, RewardPoints: 30},
+		{ID: 3, Title: "Vendedor Activo", Description: "Publica 5 productos diferentes", RequiredLevel: 2, RewardPoints: 50},
+		{ID: 4, Title: "Comprador Frecuente", Description: "Completa 5 compras exitosas", RequiredLevel: 2, RewardPoints: 50},
+		{ID: 5, Title: "Miembro Confiable", Description: "Alcanza 100 puntos de reputación", RequiredLevel: 3, RewardPoints: 75},
+		{ID: 6, Title: "Comerciante Experto", Description: "Realiza 10 ventas exitosas", RequiredLevel: 4, RewardPoints: 100},
+		{ID: 7, Title: "Leyenda ULEAM", Description: "Alcanza el nivel 5 y mantén una reputación positiva", RequiredLevel: 5, RewardPoints: 150},
+	}
+	m.nextMissionID = 8
+}
+
+func (m *Memoria) ListarMissions() []models.Mission {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.Mission, len(m.missions))
+	copy(copia, m.missions)
+	return copia
 }

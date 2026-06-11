@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// /Message handlers
 func (s *Server) ListarMessages(w http.ResponseWriter, _ *http.Request) {
 	messages := s.Storage.ListarMessages()
 	RespondJSON(w, http.StatusOK, messages)
@@ -111,4 +112,10 @@ func (s *Server) BorrarMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondJSON(w, http.StatusNoContent, nil)
+}
+
+// /Misiones handlers
+func (s *Server) ListarMissions(w http.ResponseWriter, _ *http.Request) {
+	missions := s.Storage.ListarMissions()
+	RespondJSON(w, http.StatusOK, missions)
 }
