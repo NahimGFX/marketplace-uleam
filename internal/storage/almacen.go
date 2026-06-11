@@ -12,4 +12,5 @@ type Almacen interface {
 	// MODULO 2
 
 	// MODULO 3
+	ListarMessages() []models.Message
 }

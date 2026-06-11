@@ -17,6 +17,12 @@ type Memoria struct {
 	// MODULO 2
 
 	// MODULO 3
+	messages          []models.Message
+	nextMessageID     int
+	missions          []models.Mission
+	nextMissionID     int
+	usermissions      []models.UserMission
+	nextUserMissionID int
 
 	mu sync.RWMutex
 }
@@ -34,7 +40,12 @@ func NuevaMemoria() *Memoria {
 		// MODULO 2
 
 		// MODULO 3
-
+		messages:          []models.Message{},
+		nextMessageID:     1,
+		missions:          []models.Mission{},
+		nextMissionID:     1,
+		usermissions:      []models.UserMission{},
+		nextUserMissionID: 1,
 	}
 }
 
@@ -76,3 +87,27 @@ func (m *Memoria) ListarUsers() []models.User {
 // =========================================================
 // MODULO 3
 // =========================================================
+func (m *Memoria) SeedMessages() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.messages = []models.Message{
+		{ID: 1, SenderID: 1, ReceiverID: 2, Content: "Hola María, ¿aún tienes disponible el libro de Redes?"},
+		{ID: 2, SenderID: 2, ReceiverID: 1, Content: "Sí, todavía está disponible."},
+		{ID: 3, SenderID: 3, ReceiverID: 4, Content: "Buenas, ¿podrías compartir los apuntes de Base de Datos?"},
+		{ID: 4, SenderID: 4, ReceiverID: 3, Content: "Claro, te los envío en un momento."},
+		{ID: 5, SenderID: 5, ReceiverID: 6, Content: "¿Sigues ofreciendo tutorías de Programación Web?"},
+		{ID: 6, SenderID: 6, ReceiverID: 5, Content: "Sí, tengo horarios disponibles esta semana."},
+		{ID: 7, SenderID: 7, ReceiverID: 1, Content: "Hola, estoy interesado en el libro de Cálculo."},
+	}
+	m.nextMessageID = 8
+}
+
+func (m *Memoria) ListarMessages() []models.Message {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.Message, len(m.messages))
+	copy(copia, m.messages)
+	return copia
+}

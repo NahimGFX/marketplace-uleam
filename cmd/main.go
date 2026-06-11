@@ -16,6 +16,7 @@ func main() {
 
 	almacen := storage.NuevaMemoria()
 	almacen.SeedUsers()
+	almacen.SeedMessages()
 
 	servidor := handlers.NewServer(almacen)
 	// 4. Router + middleware.
@@ -31,6 +32,7 @@ func main() {
 		// MODULO 2
 
 		// MODULO 3
+		r.Get("/rmesa", servidor.ListarMessages)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
