@@ -280,3 +280,13 @@ func (m *Memoria) BuscarUserMissionPorID(id int) (models.UserMission, bool) {
 	}
 	return models.UserMission{}, false
 }
+
+func (m *Memoria) CrearUserMission(p models.UserMission) models.UserMission {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	p.ID = m.nextUserMissionID
+	m.nextUserMissionID++
+	m.usermissions = append(m.usermissions, p)
+	return p
+}
