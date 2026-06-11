@@ -210,3 +210,19 @@ func (s *Server) ActualizarMision(w http.ResponseWriter, r *http.Request) {
 
 	RespondJSON(w, http.StatusOK, actualizado)
 }
+
+// BorrarMision atiende DELETE /api/v1/misiones/{id}.
+func (s *Server) BorrarMision(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	if !s.Storage.BorrarMision(id) {
+		RespondError(w, http.StatusNotFound, "misión no encontrada")
+		return
+	}
+
+	RespondJSON(w, http.StatusNoContent, nil)
+}

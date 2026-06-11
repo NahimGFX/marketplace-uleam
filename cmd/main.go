@@ -34,16 +34,17 @@ func main() {
 
 		// MODULO 3
 		///messages
-		r.Get("/rmesa", servidor.ListarMessages)
-		r.Get("/lmesa/{id}", servidor.ObtenerMessage)
-		r.Post("/cremesa", servidor.CrearMessage)
-		r.Put("/amesa/{id}", servidor.ActualizarMessage)
-		r.Delete("/dmesa/{id}", servidor.BorrarMessage)
+		r.Get("/messages", servidor.ListarMessages)
+		r.Get("/messages/{id}", servidor.ObtenerMessage)
+		r.Post("/messages", servidor.CrearMessage)
+		r.Put("/messages/{id}", servidor.ActualizarMessage)
+		r.Delete("/messages/{id}", servidor.BorrarMessage)
 		///missions
-		r.Get("/rmission", servidor.ListarMissions)
-		r.Get("/lmission/{id}", servidor.ObtenerMision)
-		r.Post("/cremission", servidor.CrearMision)
-		r.Put("/amission/{id}", servidor.ActualizarMision)
+		r.Get("/missions", servidor.ListarMissions)
+		r.Get("/missions/{id}", servidor.ObtenerMision)
+		r.Post("/missions", servidor.CrearMision)
+		r.Put("/missions/{id}", servidor.ActualizarMision)
+
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")

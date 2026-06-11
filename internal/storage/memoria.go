@@ -228,3 +228,17 @@ func (m *Memoria) ActualizarMision(id int, datos models.Mission) (models.Mission
 	}
 	return models.Mission{}, false
 }
+
+// BorrarMision elimina la misión con el ID dado.
+func (m *Memoria) BorrarMision(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.missions {
+		if p.ID == id {
+			m.missions = append(m.missions[:i], m.missions[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
