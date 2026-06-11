@@ -30,4 +30,5 @@ type Almacen interface {
 	BuscarUserMissionPorID(id int) (models.UserMission, bool)
 	CrearUserMission(userMission models.UserMission) models.UserMission
 	ActualizarUserMission(id int, datos models.UserMission) (models.UserMission, bool)
+	BorrarUserMission(id int) bool
 }
