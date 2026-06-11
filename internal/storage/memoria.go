@@ -44,12 +44,12 @@ func NuevaMemoria() *Memoria {
 		nextBadgeID:  1,
 
 		// MODULO 2
-		categorias      []models.Categoria
-		nextCategoriaID int
-		productos       []models.Producto
-		nextProductoID  int
-		orden           []models.Orden
-		nextOrdenID     int
+		categorias:      []models.Categoria{},
+		nextCategoriaID: 1,
+		productos:       []models.Producto{},
+		nextProductoID:  1,
+		orden:           []models.Orden{},
+		nextOrdenID:     1,
 
 		// MODULO 3
 		messages:          []models.Message{},
@@ -367,6 +367,7 @@ func (m *Memoria) BorrarOrden(id int) bool {
 	}
 	return false
 }
+
 // =========================================================
 // MODULO 3
 // =========================================================
