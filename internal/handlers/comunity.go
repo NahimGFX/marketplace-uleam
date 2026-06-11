@@ -226,3 +226,9 @@ func (s *Server) BorrarMision(w http.ResponseWriter, r *http.Request) {
 
 	RespondJSON(w, http.StatusNoContent, nil)
 }
+
+// ListarUsermissions atiende GET /api/v1/usermissions.
+func (s *Server) ListarUsermissions(w http.ResponseWriter, _ *http.Request) {
+	usermissions := s.Storage.ListarUsermissions()
+	RespondJSON(w, http.StatusOK, usermissions)
+}

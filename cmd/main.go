@@ -18,6 +18,7 @@ func main() {
 	almacen.SeedUsers()
 	almacen.SeedMessages()
 	almacen.SeedMissions()
+	almacen.SeedUsermissions()
 
 	servidor := handlers.NewServer(almacen)
 	// 4. Router + middleware.
@@ -45,6 +46,8 @@ func main() {
 		r.Post("/missions", servidor.CrearMision)
 		r.Put("/missions/{id}", servidor.ActualizarMision)
 		r.Delete("/missions/{id}", servidor.BorrarMision)
+		///usermissions
+		r.Get("/usermissions", servidor.ListarUsermissions)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")

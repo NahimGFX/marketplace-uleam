@@ -260,3 +260,11 @@ func (m *Memoria) SeedUsermissions() {
 	}
 	m.nextUserMissionID = 8
 }
+func (m *Memoria) ListarUsermissions() []models.UserMission {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.UserMission, len(m.usermissions))
+	copy(copia, m.usermissions)
+	return copia
+}
