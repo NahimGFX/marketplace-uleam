@@ -30,6 +30,23 @@ func main() {
 		r.Get("/ruses", servidor.ListarUsers)
 
 		// MODULO 2
+		r.Get("/categorias", servidor.ListarCategorias)
+		r.Get("/categorias/{id}", servidor.ObtenerCategoria)
+		r.Post("/categorias", servidor.CrearCategoria)
+		r.Put("/categorias/{id}", servidor.ActualizarCategoria)
+		r.Delete("/categorias/{id}", servidor.BorrarCategoria)
+
+		r.Get("/productos", servidor.ListarProductos)
+		r.Get("/productos/{id}", servidor.ObtenerProducto)
+		r.Post("/productos", servidor.CrearProducto)
+		r.Put("/productos/{id}", servidor.ActualizarProducto)
+		r.Delete("/productos/{id}", servidor.BorrarProducto)
+
+		r.Get("/ordenes", servidor.ListarOrdenes)
+		r.Get("/ordenes/{id}", servidor.ObtenerOrden)
+		r.Post("/ordenes", servidor.CrearOrden)
+		r.Put("/ordenes/{id}", servidor.ActualizarOrden)
+		r.Delete("/ordenes/{id}", servidor.BorrarOrden)
 
 		// MODULO 3
 		r.Get("/rmesa", servidor.ListarMessages)
