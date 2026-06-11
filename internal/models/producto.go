@@ -1,21 +1,21 @@
 package models
 
 type Categoria struct {
-	ID   int
-	Name string
+	ID   int    `json:"id"`
+	Name string `json:"nombre"`
 }
 
 type Producto struct {
-	ID          int
-	Nombre      string
-	Descripcion string
-	Precio      float64
-	CategoriaID int
+	ID          int     `json:"id"`
+	Nombre      string  `json:"nombre"`
+	Descripcion string  `json:"descripcion"`
+	Precio      float64 `json:"precio"`
+	CategoriaID int     `json:"categoria_id"`
 }
 
 type Orden struct {
-	ID          int
-	ProductoID  int
-	IDComprador int
-	Estado      string
+	ID          int    `json:"id"`
+	ProductoID  int    `json:"producto_id"`
+	IDComprador int    `json:"comprador_id"`
+	Estado      string `json:"estado"`
 }
