@@ -290,3 +290,17 @@ func (m *Memoria) CrearUserMission(p models.UserMission) models.UserMission {
 	m.usermissions = append(m.usermissions, p)
 	return p
 }
+
+func (m *Memoria) ActualizarUserMission(id int, datos models.UserMission) (models.UserMission, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.usermissions {
+		if p.ID == id {
+			datos.ID = id
+			m.usermissions[i] = datos
+			return datos, true
+		}
+	}
+	return models.UserMission{}, false
+}
