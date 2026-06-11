@@ -232,3 +232,20 @@ func (s *Server) ListarUsermissions(w http.ResponseWriter, _ *http.Request) {
 	usermissions := s.Storage.ListarUsermissions()
 	RespondJSON(w, http.StatusOK, usermissions)
 }
+
+// ObtenerUserMission atiende GET /api/v1/usermissions/{id}.
+func (s *Server) ObtenerUserMission(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	usermission, encontrado := s.Storage.BuscarUserMissionPorID(id)
+	if !encontrado {
+		RespondError(w, http.StatusNotFound, "misión no encontrada")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, usermission)
+}
