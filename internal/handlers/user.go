@@ -10,7 +10,6 @@ import (
 
 	"marketplace-api/internal/models"
 	"marketplace-api/internal/storage"
-	"net/http"
 )
 
 type Server struct {
@@ -86,28 +85,23 @@ func (s *Server) ActualizarUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var nuevo models.User
-	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
-		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
-		return
-	}
-	if strings.TrimSpace(nuevo.Name) == "" {
+	if strings.TrimSpace(datos.Name) == "" {
 		RespondError(w, http.StatusBadRequest, "el campo nombre es obligatorio")
 		return
 	}
-	if strings.TrimSpace(nuevo.Password) == "" {
+	if strings.TrimSpace(datos.Password) == "" {
 		RespondError(w, http.StatusBadRequest, "el campo contrseña es obligatorio")
 		return
 	}
-	if strings.TrimSpace(nuevo.Email) == "" {
+	if strings.TrimSpace(datos.Email) == "" {
 		RespondError(w, http.StatusBadRequest, "el campo email es obligatorio")
 		return
 	}
-	if nuevo.Level < 0 {
+	if datos.Level < 0 {
 		RespondError(w, http.StatusBadRequest, "el nivel no puede ser negativo")
 		return
 	}
-	if nuevo.Reputation < 0 {
+	if datos.Reputation < 0 {
 		RespondError(w, http.StatusBadRequest, "la reputacion no puede ser negativo")
 		return
 	}
