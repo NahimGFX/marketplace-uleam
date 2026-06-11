@@ -242,3 +242,21 @@ func (m *Memoria) BorrarMision(id int) bool {
 	}
 	return false
 }
+
+// ///////entidad UserMission
+
+func (m *Memoria) SeedUsermissions() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.usermissions = []models.UserMission{
+		{ID: 1, UserID: 1, MissionID: 1, Completed: true},
+		{ID: 2, UserID: 2, MissionID: 1, Completed: true},
+		{ID: 3, UserID: 3, MissionID: 2, Completed: false},
+		{ID: 4, UserID: 4, MissionID: 3, Completed: true},
+		{ID: 5, UserID: 5, MissionID: 4, Completed: false},
+		{ID: 6, UserID: 6, MissionID: 5, Completed: true},
+		{ID: 7, UserID: 7, MissionID: 2, Completed: false},
+	}
+	m.nextUserMissionID = 8
+}
