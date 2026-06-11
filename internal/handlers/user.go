@@ -20,6 +20,8 @@ func NewServer(s storage.Almacen) *Server {
 	return &Server{Storage: s}
 }
 
+// Users
+
 func (s *Server) ListarUsers(w http.ResponseWriter, _ *http.Request) {
 	users := s.Storage.ListarUsers()
 	RespondJSON(w, http.StatusOK, users)
@@ -128,4 +130,48 @@ func (s *Server) BorrarUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondJSON(w, http.StatusNoContent, nil)
+}
+
+// Reviews
+func (s *Server) ListarReviews(w http.ResponseWriter, r *http.Request) {
+	reviews := s.Storage.ListarReviews()
+	RespondJSON(w, http.StatusOK, reviews)
+}
+
+func (s *Server) ObteneReview(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	review, encontrado := s.Storage.BuscarReviewPorID(id)
+	if !encontrado {
+		RespondError(w, http.StatusNotFound, "review no encontrado")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, review)
+}
+
+// Badges
+func (s *Server) ListarBadges(w http.ResponseWriter, r *http.Request) {
+	badges := s.Storage.ListarReviews()
+	RespondJSON(w, http.StatusOK, badges)
+}
+
+func (s *Server) ObteneBadge(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	badge, encontrado := s.Storage.BuscarBadgePorID(id)
+	if !encontrado {
+		RespondError(w, http.StatusNotFound, "badge no encontrado")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, badge)
 }
