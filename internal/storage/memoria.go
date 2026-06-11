@@ -136,6 +136,7 @@ func (m *Memoria) BorrarUser(id int) bool {
 // =========================================================
 // MODULO 3
 // =========================================================
+// ///////entidad Message
 func (m *Memoria) SeedMessages() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -159,4 +160,134 @@ func (m *Memoria) ListarMessages() []models.Message {
 	copia := make([]models.Message, len(m.messages))
 	copy(copia, m.messages)
 	return copia
+}
+
+// BuscarProductoPorID devuelve el producto con el ID dado (patrón comma-ok).
+func (m *Memoria) BuscarMessagePorID(id int) (models.Message, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, p := range m.messages {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.Message{}, false
+}
+
+// CrearProducto agrega un Mensaje nuevo y devuelve el producto con ID asignado.
+func (m *Memoria) CrearMessage(p models.Message) models.Message {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	p.ID = m.nextMessageID
+	m.nextMessageID++
+	m.messages = append(m.messages, p)
+	return p
+}
+
+// ActualizarMensaje reemplaza el mensaje con el ID dado.
+func (m *Memoria) ActualizarMessage(id int, datos models.Message) (models.Message, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.messages {
+		if p.ID == id {
+			datos.ID = id
+			m.messages[i] = datos
+			return datos, true
+		}
+	}
+	return models.Message{}, false
+}
+
+// BorrarMensaje elimina el mensaje con el ID dado.
+func (m *Memoria) BorrarMessage(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.messages {
+		if p.ID == id {
+			m.messages = append(m.messages[:i], m.messages[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
+// ///////////entidad Mission
+func (m *Memoria) SeedMissions() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.missions = []models.Mission{
+		{ID: 1, Title: "Primera Publicación", Description: "Publica tu primer producto en el marketplace", RequiredLevel: 1, RewardPoints: 20},
+		{ID: 2, Title: "Primera Compra", Description: "Realiza tu primera compra dentro de la plataforma", RequiredLevel: 1, RewardPoints: 30},
+		{ID: 3, Title: "Vendedor Activo", Description: "Publica 5 productos diferentes", RequiredLevel: 2, RewardPoints: 50},
+		{ID: 4, Title: "Comprador Frecuente", Description: "Completa 5 compras exitosas", RequiredLevel: 2, RewardPoints: 50},
+		{ID: 5, Title: "Miembro Confiable", Description: "Alcanza 100 puntos de reputación", RequiredLevel: 3, RewardPoints: 75},
+		{ID: 6, Title: "Comerciante Experto", Description: "Realiza 10 ventas exitosas", RequiredLevel: 4, RewardPoints: 100},
+		{ID: 7, Title: "Leyenda ULEAM", Description: "Alcanza el nivel 5 y mantén una reputación positiva", RequiredLevel: 5, RewardPoints: 150},
+	}
+	m.nextMissionID = 8
+}
+
+func (m *Memoria) ListarMissions() []models.Mission {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.Mission, len(m.missions))
+	copy(copia, m.missions)
+	return copia
+}
+
+func (m *Memoria) BuscarMisionPorID(id int) (models.Mission, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, p := range m.missions {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.Mission{}, false
+}
+
+func (m *Memoria) CrearMision(p models.Mission) models.Mission {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	p.ID = m.nextMissionID
+	m.nextMissionID++
+	m.missions = append(m.missions, p)
+	return p
+}
+
+// ActualizarMision reemplaza la misión con el ID dado.
+func (m *Memoria) ActualizarMision(id int, datos models.Mission) (models.Mission, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.missions {
+		if p.ID == id {
+			datos.ID = id
+			m.missions[i] = datos
+			return datos, true
+		}
+	}
+	return models.Mission{}, false
+}
+
+// BorrarMision elimina la misión con el ID dado.
+func (m *Memoria) BorrarMision(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.missions {
+		if p.ID == id {
+			m.missions = append(m.missions[:i], m.missions[i+1:]...)
+			return true
+		}
+	}
+	return false
 }
