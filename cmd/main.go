@@ -28,7 +28,11 @@ func main() {
 	// 5. Rutas versionadas /api/v1/.
 	r.Route("/api/v1", func(r chi.Router) {
 		// MODULO 1
-		r.Get("/ruses", servidor.ListarUsers)
+		r.Get("/users", servidor.ListarUsers)
+		r.Post("/users", servidor.CrearUser)
+		r.Get("/users/{id}", servidor.ObtenerUser)
+		r.Put("/users/{id}", servidor.ActualizarUser)
+		r.Delete("/users/{id}", servidor.BorrarUser)
 
 		// MODULO 2
 
