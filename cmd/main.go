@@ -51,6 +51,7 @@ func main() {
 		r.Get("/usermissions/{id}", servidor.ObtenerUserMission)
 		r.Post("/usermissions", servidor.CrearUserMission)
 		r.Put("/usermissions/{id}", servidor.ActualizarUserMission)
+		r.Delete("/usermissions/{id}", servidor.BorrarUserMission)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")

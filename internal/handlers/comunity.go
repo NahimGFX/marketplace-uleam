@@ -304,3 +304,19 @@ func (s *Server) ActualizarUserMission(w http.ResponseWriter, r *http.Request) {
 
 	RespondJSON(w, http.StatusOK, actualizado)
 }
+
+// BorrarUserMission atiende DELETE /api/v1/usermissions/{id}.
+func (s *Server) BorrarUserMission(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	if !s.Storage.BorrarUserMission(id) {
+		RespondError(w, http.StatusNotFound, "usermisión no encontrada")
+		return
+	}
+
+	RespondJSON(w, http.StatusNoContent, nil)
+}
