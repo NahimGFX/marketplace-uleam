@@ -80,6 +80,55 @@ func (m *Memoria) ListarUsers() []models.User {
 	return copia
 }
 
+func (m *Memoria) BuscarUserPorID(id int) (models.User, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, u := range m.users {
+		if u.ID == id {
+			return u, true
+		}
+	}
+	return models.User{}, false
+}
+
+func (m *Memoria) CrearUser(u models.User) models.User {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	u.ID = m.nextUserID
+	m.nextUserID++
+	m.users = append(m.users, u)
+	return u
+}
+
+func (m *Memoria) ActualizarUser(id int, datos models.User) (models.User, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, u := range m.users {
+		if u.ID == id {
+			datos.ID = id
+			m.users[i] = datos
+			return datos, true
+		}
+	}
+	return models.User{}, false
+}
+
+func (m *Memoria) BorrarUser(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, u := range m.users {
+		if u.ID == id {
+			m.users = append(m.users[:i], m.users[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
 // =========================================================
 // MODULO 2
 // =========================================================
