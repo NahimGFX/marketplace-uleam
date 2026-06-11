@@ -44,7 +44,7 @@ func main() {
 		r.Get("/missions/{id}", servidor.ObtenerMision)
 		r.Post("/missions", servidor.CrearMision)
 		r.Put("/missions/{id}", servidor.ActualizarMision)
-
+		r.Delete("/missions/{id}", servidor.BorrarMision)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
