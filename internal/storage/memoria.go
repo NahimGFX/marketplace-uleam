@@ -111,3 +111,56 @@ func (m *Memoria) ListarMessages() []models.Message {
 	copy(copia, m.messages)
 	return copia
 }
+
+// BuscarProductoPorID devuelve el producto con el ID dado (patrón comma-ok).
+func (m *Memoria) BuscarMessagePorID(id int) (models.Message, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, p := range m.messages {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return models.Message{}, false
+}
+
+// CrearProducto agrega un Mensaje nuevo y devuelve el producto con ID asignado.
+func (m *Memoria) CrearMessage(p models.Message) models.Message {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	p.ID = m.nextMessageID
+	m.nextMessageID++
+	m.messages = append(m.messages, p)
+	return p
+}
+
+// ActualizarMensaje reemplaza el mensaje con el ID dado.
+func (m *Memoria) ActualizarMessage(id int, datos models.Message) (models.Message, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.messages {
+		if p.ID == id {
+			datos.ID = id
+			m.messages[i] = datos
+			return datos, true
+		}
+	}
+	return models.Message{}, false
+}
+
+// BorrarMensaje elimina el mensaje con el ID dado.
+func (m *Memoria) BorrarMessage(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.messages {
+		if p.ID == id {
+			m.messages = append(m.messages[:i], m.messages[i+1:]...)
+			return true
+		}
+	}
+	return false
+}

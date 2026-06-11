@@ -33,6 +33,10 @@ func main() {
 
 		// MODULO 3
 		r.Get("/rmesa", servidor.ListarMessages)
+		r.Get("/lmesa/{id}", servidor.ObtenerMessage)
+		r.Post("/cremesa", servidor.CrearMessage)
+		r.Put("/amesa/{id}", servidor.ActualizarMessage)
+		r.Delete("/dmesa/{id}", servidor.BorrarMessage)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")

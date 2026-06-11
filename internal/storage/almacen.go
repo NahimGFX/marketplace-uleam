@@ -13,4 +13,8 @@ type Almacen interface {
 
 	// MODULO 3
 	ListarMessages() []models.Message
+	BuscarMessagePorID(id int) (models.Message, bool)
+	CrearMessage(message models.Message) models.Message
+	ActualizarMessage(id int, datos models.Message) (models.Message, bool)
+	BorrarMessage(id int) bool
 }
