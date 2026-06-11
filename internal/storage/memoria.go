@@ -213,3 +213,18 @@ func (m *Memoria) CrearMision(p models.Mission) models.Mission {
 	m.missions = append(m.missions, p)
 	return p
 }
+
+// ActualizarMision reemplaza la misión con el ID dado.
+func (m *Memoria) ActualizarMision(id int, datos models.Mission) (models.Mission, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, p := range m.missions {
+		if p.ID == id {
+			datos.ID = id
+			m.missions[i] = datos
+			return datos, true
+		}
+	}
+	return models.Mission{}, false
+}

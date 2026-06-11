@@ -168,3 +168,45 @@ func (s *Server) CrearMision(w http.ResponseWriter, r *http.Request) {
 	creado := s.Storage.CrearMision(nuevo)
 	RespondJSON(w, http.StatusCreated, creado)
 }
+
+// ActualizarMision atiende PUT /api/v1/misiones/{id}.
+func (s *Server) ActualizarMision(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	var datos models.Mission
+	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		return
+	}
+	if strings.TrimSpace(datos.Title) == "" {
+		RespondError(w, http.StatusBadRequest, "el título es obligatorio")
+		return
+	}
+
+	if strings.TrimSpace(datos.Description) == "" {
+		RespondError(w, http.StatusBadRequest, "la descripción es obligatoria")
+		return
+	}
+
+	if datos.RequiredLevel < 1 {
+		RespondError(w, http.StatusBadRequest, "required_level debe ser mayor que 0")
+		return
+	}
+
+	if datos.RewardPoints <= 0 {
+		RespondError(w, http.StatusBadRequest, "reward_points debe ser mayor que 0")
+		return
+	}
+
+	actualizado, encontrado := s.Storage.ActualizarMision(id, datos)
+	if !encontrado {
+		RespondError(w, http.StatusNotFound, "mensaje no encontrado")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, actualizado)
+}
