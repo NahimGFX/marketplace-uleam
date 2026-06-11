@@ -75,8 +75,16 @@ func (s *Server) ActualizarProducto(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "el campo nombre es obligatorio")
 		return
 	}
+	if strings.TrimSpace(datos.Descripcion) == "" {
+		RespondError(w, http.StatusBadRequest, "el campo descripcion es obligatorio")
+		return
+	}
 	if datos.Precio < 0 {
 		RespondError(w, http.StatusBadRequest, "el precio no puede ser negativo")
+		return
+	}
+	if datos.CategoriaID <= 0 {
+		RespondError(w, http.StatusBadRequest, "categoriaID es obligatorio")
 		return
 	}
 
