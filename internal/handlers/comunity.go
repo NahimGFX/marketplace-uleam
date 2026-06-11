@@ -249,3 +249,26 @@ func (s *Server) ObtenerUserMission(w http.ResponseWriter, r *http.Request) {
 
 	RespondJSON(w, http.StatusOK, usermission)
 }
+
+// CrearUserMission atiende POST /api/v1/usermissions.
+func (s *Server) CrearUserMission(w http.ResponseWriter, r *http.Request) {
+	var nuevo models.UserMission
+
+	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		return
+	}
+
+	if nuevo.UserID <= 0 {
+		RespondError(w, http.StatusBadRequest, "user_id es obligatorio")
+		return
+	}
+
+	if nuevo.MissionID <= 0 {
+		RespondError(w, http.StatusBadRequest, "mission_id es obligatorio")
+		return
+	}
+
+	creado := s.Storage.CrearUserMission(nuevo)
+	RespondJSON(w, http.StatusCreated, creado)
+}

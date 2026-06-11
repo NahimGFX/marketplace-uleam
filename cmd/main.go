@@ -49,6 +49,7 @@ func main() {
 		///usermissions
 		r.Get("/usermissions", servidor.ListarUsermissions)
 		r.Get("/usermissions/{id}", servidor.ObtenerUserMission)
+		r.Post("/usermissions", servidor.CrearUserMission)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
