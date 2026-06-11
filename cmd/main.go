@@ -1,4 +1,3 @@
-// Command cafeteria-api arranca el servidor HTTP de la Cafetería Universitaria.
 package main
 
 import (
@@ -16,6 +15,8 @@ func main() {
 
 	almacen := storage.NuevaMemoria()
 	almacen.SeedUsers()
+	almacen.SeedReviews()
+	almacen.SeedBadges()
 	almacen.SeedMessages()
 	almacen.SeedMissions()
 	almacen.SeedUsermissions()
@@ -29,11 +30,20 @@ func main() {
 	// 5. Rutas versionadas /api/v1/.
 	r.Route("/api/v1", func(r chi.Router) {
 		// MODULO 1
+		// Users
 		r.Get("/users", servidor.ListarUsers)
 		r.Post("/users", servidor.CrearUser)
 		r.Get("/users/{id}", servidor.ObtenerUser)
 		r.Put("/users/{id}", servidor.ActualizarUser)
 		r.Delete("/users/{id}", servidor.BorrarUser)
+
+		// Reviews
+		r.Get("/reviews", servidor.ListarReviews)
+		r.Get("/reviews/{id}", servidor.ObteneReview)
+
+		// Badges
+		r.Get("/badges", servidor.ListarBadges)
+		r.Get("/badges/{id}", servidor.ObteneBadge)
 
 		// MODULO 2
 		r.Get("/categorias", servidor.ListarCategorias)

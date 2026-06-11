@@ -13,7 +13,13 @@ type Almacen interface {
 	ActualizarUser(id int, datos models.User) (models.User, bool)
 	BorrarUser(id int) bool
 
-	//
+	// Reviews
+	ListarReviews() []models.Review
+	BuscarReviewPorID(id int) (models.Review, bool)
+	BuscarBadgePorID(id int) (models.Badge, bool)
+
+	// Badges
+	ListarBadges() []models.Badge
 
 	// MODULO 2
 	// Categorias

@@ -141,6 +141,82 @@ func (m *Memoria) BorrarUser(id int) bool {
 	return false
 }
 
+// Review
+func (m *Memoria) SeedReviews() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.reviews = []models.Review{
+		{ID: 1, ReviewerID: 2, ReviewedID: 1, Rating: 5, Comment: "Excelente vendedor, todo fue rapido y seguro"},
+		{ID: 2, ReviewerID: 1, ReviewedID: 3, Rating: 4, Comment: "Buena comunicacion y entrega puntual"},
+		{ID: 3, ReviewerID: 4, ReviewedID: 2, Rating: 5, Comment: "Muy amable y responsable"},
+		{ID: 4, ReviewerID: 5, ReviewedID: 1, Rating: 4, Comment: "El producto estaba en buen estado"},
+		{ID: 5, ReviewerID: 6, ReviewedID: 4, Rating: 5, Comment: "Recomendado para futuras compras"},
+		{ID: 6, ReviewerID: 7, ReviewedID: 5, Rating: 3, Comment: "La entrega demoro un poco pero llego bien"},
+		{ID: 7, ReviewerID: 3, ReviewedID: 6, Rating: 5, Comment: "Excelente experiencia de compra"},
+	}
+	m.nextReviewID = 8
+}
+
+func (m *Memoria) ListarReviews() []models.Review {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.Review, len(m.reviews))
+	copy(copia, m.reviews)
+	return copia
+}
+
+func (m *Memoria) BuscarReviewPorID(id int) (models.Review, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, u := range m.reviews {
+		if u.ID == id {
+			return u, true
+		}
+	}
+	return models.Review{}, false
+}
+
+// Bagdges
+func (m *Memoria) SeedBadges() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.badges = []models.Badge{
+		{ID: 1, Name: "Novato", Description: "Alcanza 10 puntos de reputacion", RequiredRep: 10},
+		{ID: 2, Name: "Colaborador", Description: "Alcanza 50 puntos de reputacion", RequiredRep: 50},
+		{ID: 3, Name: "Vendedor Confiable", Description: "Alcanza 100 puntos de reputacion", RequiredRep: 100},
+		{ID: 4, Name: "Comerciante Experto", Description: "Alcanza 200 puntos de reputacion", RequiredRep: 200},
+		{ID: 5, Name: "Tutor Destacado", Description: "Recibe excelentes calificaciones de otros usuarios", RequiredRep: 300},
+		{ID: 6, Name: "Embajador ULEAM", Description: "Mantiene una reputacion sobresaliente en la plataforma", RequiredRep: 500},
+		{ID: 7, Name: "Leyenda ULEAM", Description: "Alcanza el maximo reconocimiento dentro del marketplace", RequiredRep: 1000},
+	}
+	m.nextBadgeID = 8
+}
+
+func (m *Memoria) ListarBadges() []models.Badge {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	copia := make([]models.Badge, len(m.badges))
+	copy(copia, m.badges)
+	return copia
+}
+
+func (m *Memoria) BuscarBadgePorID(id int) (models.Badge, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, u := range m.badges {
+		if u.ID == id {
+			return u, true
+		}
+	}
+	return models.Badge{}, false
+}
+
 // =========================================================
 // MODULO 2
 // =========================================================
