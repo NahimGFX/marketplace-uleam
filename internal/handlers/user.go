@@ -227,6 +227,21 @@ func (s *Server) ActualizarReview(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, actualizado)
 }
 
+func (s *Server) BorrarReview(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	if !s.Storage.BorrarReview(id) {
+		RespondError(w, http.StatusNotFound, "review no encontrado")
+		return
+	}
+
+	RespondJSON(w, http.StatusNoContent, nil)
+}
+
 // Badges
 func (s *Server) ListarBadges(w http.ResponseWriter, r *http.Request) {
 	badges := s.Storage.ListarBadges()
@@ -304,4 +319,19 @@ func (s *Server) ActualizarBadge(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondJSON(w, http.StatusOK, actualizado)
+}
+
+func (s *Server) BorrarBadge(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	if !s.Storage.BorrarBadge(id) {
+		RespondError(w, http.StatusNotFound, "badge no encontrado")
+		return
+	}
+
+	RespondJSON(w, http.StatusNoContent, nil)
 }

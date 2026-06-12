@@ -204,6 +204,19 @@ func (m *Memoria) ActualizarReview(id int, datos models.Review) (models.Review, 
 
 }
 
+func (m *Memoria) BorrarReview(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, u := range m.reviews {
+		if u.ID == id {
+			m.reviews = append(m.reviews[:i], m.reviews[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
 // Bagdges
 func (m *Memoria) SeedBadges() {
 	m.mu.Lock()
@@ -264,6 +277,19 @@ func (m *Memoria) ActualizarBadge(id int, datos models.Badge) (models.Badge, boo
 		}
 	}
 	return models.Badge{}, false
+}
+
+func (m *Memoria) BorrarBadge(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, u := range m.badges {
+		if u.ID == id {
+			m.badges = append(m.badges[:i], m.badges[i+1:]...)
+			return true
+		}
+	}
+	return false
 }
 
 // =========================================================
