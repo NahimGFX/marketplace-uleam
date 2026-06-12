@@ -179,6 +179,44 @@ func (m *Memoria) BuscarReviewPorID(id int) (models.Review, bool) {
 	return models.Review{}, false
 }
 
+func (m *Memoria) CrearReview(u models.Review) models.Review {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	u.ID = m.nextReviewID
+	m.nextReviewID++
+	m.reviews = append(m.reviews, u)
+	return u
+}
+
+func (m *Memoria) ActualizarReview(id int, datos models.Review) (models.Review, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, u := range m.reviews {
+		if u.ID == id {
+			datos.ID = id
+			m.reviews[i] = datos
+			return datos, true
+		}
+	}
+	return models.Review{}, false
+
+}
+
+func (m *Memoria) BorrarReview(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, u := range m.reviews {
+		if u.ID == id {
+			m.reviews = append(m.reviews[:i], m.reviews[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
 // Bagdges
 func (m *Memoria) SeedBadges() {
 	m.mu.Lock()
@@ -215,6 +253,43 @@ func (m *Memoria) BuscarBadgePorID(id int) (models.Badge, bool) {
 		}
 	}
 	return models.Badge{}, false
+}
+
+func (m *Memoria) CrearBadge(u models.Badge) models.Badge {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	u.ID = m.nextBadgeID
+	m.nextBadgeID++
+	m.badges = append(m.badges, u)
+	return u
+}
+
+func (m *Memoria) ActualizarBadge(id int, datos models.Badge) (models.Badge, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, u := range m.badges {
+		if u.ID == id {
+			datos.ID = id
+			m.badges[i] = datos
+			return datos, true
+		}
+	}
+	return models.Badge{}, false
+}
+
+func (m *Memoria) BorrarBadge(id int) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for i, u := range m.badges {
+		if u.ID == id {
+			m.badges = append(m.badges[:i], m.badges[i+1:]...)
+			return true
+		}
+	}
+	return false
 }
 
 // =========================================================
