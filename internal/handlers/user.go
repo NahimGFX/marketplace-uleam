@@ -176,9 +176,55 @@ func (s *Server) CrearReview(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "el comentario es obligatorio")
 		return
 	}
+	if nuevo.ReviewerID == nuevo.ReviewedID {
+		RespondError(w, http.StatusBadRequest, "un usuario no puede calificarse a si mismo")
+		return
+	}
 
 	creado := s.Storage.CrearReview(nuevo)
 	RespondJSON(w, http.StatusCreated, creado)
+}
+
+func (s *Server) ActualizarReview(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	var datos models.Review
+	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		return
+	}
+	if datos.ReviewerID < 0 {
+		RespondError(w, http.StatusBadRequest, "el campo reviewer_id es obligatorio")
+		return
+	}
+	if datos.ReviewedID < 0 {
+		RespondError(w, http.StatusBadRequest, "el campo reviewed_id es obligatorio")
+		return
+	}
+	if datos.Rating < 0 || datos.Rating > 5 {
+		RespondError(w, http.StatusBadRequest, "el rating debe ser un número entre 0 y 5")
+		return
+	}
+	if strings.TrimSpace(datos.Comment) == "" {
+		RespondError(w, http.StatusBadRequest, "el comentario es obligatorio")
+		return
+	}
+	if datos.ReviewerID == datos.ReviewedID {
+		RespondError(w, http.StatusBadRequest, "un usuario no puede calificarse a si mismo")
+		return
+	}
+
+	actualizado, encontrado := s.Storage.ActualizarReview(id, datos)
+	if !encontrado {
+		RespondError(w, http.StatusNotFound, "Review no encontrado")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, actualizado)
 }
 
 // Badges
@@ -224,4 +270,38 @@ func (s *Server) CrearBadge(w http.ResponseWriter, r *http.Request) {
 
 	creado := s.Storage.CrearBadge(nuevo)
 	RespondJSON(w, http.StatusCreated, creado)
+}
+
+func (s *Server) ActualizarBadge(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		return
+	}
+
+	var datos models.Badge
+	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		return
+	}
+	if strings.TrimSpace(datos.Name) == "" {
+		RespondError(w, http.StatusBadRequest, "el nombre es obligatorio")
+		return
+	}
+	if strings.TrimSpace(datos.Description) == "" {
+		RespondError(w, http.StatusBadRequest, "la descripcion es obligatorio")
+		return
+	}
+	if datos.RequiredRep < 0 {
+		RespondError(w, http.StatusBadRequest, "la reputacion requerida no puede ser negativa")
+		return
+	}
+
+	actualizado, encontrado := s.Storage.ActualizarBadge(id, datos)
+	if !encontrado {
+		RespondError(w, http.StatusNotFound, "Badge no encontrado")
+		return
+	}
+
+	RespondJSON(w, http.StatusOK, actualizado)
 }

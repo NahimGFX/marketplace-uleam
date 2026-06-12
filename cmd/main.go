@@ -41,11 +41,13 @@ func main() {
 		r.Get("/reviews", servidor.ListarReviews)
 		r.Get("/reviews/{id}", servidor.ObteneReview)
 		r.Post("/reviews", servidor.CrearReview)
+		r.Put("/reviews/{id}", servidor.ActualizarReview)
 
 		// Badges
 		r.Get("/badges", servidor.ListarBadges)
 		r.Get("/badges/{id}", servidor.ObteneBadge)
 		r.Post("/badges", servidor.CrearBadge)
+		r.Put("/badges/{id}", servidor.ActualizarBadge)
 
 		// MODULO 2
 		r.Get("/categorias", servidor.ListarCategorias)
