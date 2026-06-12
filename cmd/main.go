@@ -40,10 +40,12 @@ func main() {
 		// Reviews
 		r.Get("/reviews", servidor.ListarReviews)
 		r.Get("/reviews/{id}", servidor.ObteneReview)
+		r.Post("/reviews", servidor.CrearReview)
 
 		// Badges
 		r.Get("/badges", servidor.ListarBadges)
 		r.Get("/badges/{id}", servidor.ObteneBadge)
+		r.Post("/badges", servidor.CrearBadge)
 
 		// MODULO 2
 		r.Get("/categorias", servidor.ListarCategorias)

@@ -16,10 +16,12 @@ type Almacen interface {
 	// Reviews
 	ListarReviews() []models.Review
 	BuscarReviewPorID(id int) (models.Review, bool)
-	BuscarBadgePorID(id int) (models.Badge, bool)
+	CrearReview(u models.Review) models.Review
 
 	// Badges
 	ListarBadges() []models.Badge
+	BuscarBadgePorID(id int) (models.Badge, bool)
+	CrearBadge(u models.Badge) models.Badge
 
 	// MODULO 2
 	// Categorias

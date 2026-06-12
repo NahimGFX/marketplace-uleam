@@ -154,9 +154,36 @@ func (s *Server) ObteneReview(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, review)
 }
 
+func (s *Server) CrearReview(w http.ResponseWriter, r *http.Request) {
+	var nuevo models.Review
+	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		return
+	}
+	if nuevo.ReviewerID < 0 {
+		RespondError(w, http.StatusBadRequest, "el campo reviewer_id es obligatorio")
+		return
+	}
+	if nuevo.ReviewedID < 0 {
+		RespondError(w, http.StatusBadRequest, "el campo reviewed_id es obligatorio")
+		return
+	}
+	if nuevo.Rating < 0 || nuevo.Rating > 5 {
+		RespondError(w, http.StatusBadRequest, "el rating debe ser un número entre 0 y 5")
+		return
+	}
+	if strings.TrimSpace(nuevo.Comment) == "" {
+		RespondError(w, http.StatusBadRequest, "el comentario es obligatorio")
+		return
+	}
+
+	creado := s.Storage.CrearReview(nuevo)
+	RespondJSON(w, http.StatusCreated, creado)
+}
+
 // Badges
 func (s *Server) ListarBadges(w http.ResponseWriter, r *http.Request) {
-	badges := s.Storage.ListarReviews()
+	badges := s.Storage.ListarBadges()
 	RespondJSON(w, http.StatusOK, badges)
 }
 
@@ -174,4 +201,27 @@ func (s *Server) ObteneBadge(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondJSON(w, http.StatusOK, badge)
+}
+
+func (s *Server) CrearBadge(w http.ResponseWriter, r *http.Request) {
+	var nuevo models.Badge
+	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
+		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		return
+	}
+	if strings.TrimSpace(nuevo.Name) == "" {
+		RespondError(w, http.StatusBadRequest, "el nombre es obligatorio")
+		return
+	}
+	if strings.TrimSpace(nuevo.Description) == "" {
+		RespondError(w, http.StatusBadRequest, "la descripcion es obligatorio")
+		return
+	}
+	if nuevo.RequiredRep < 0 {
+		RespondError(w, http.StatusBadRequest, "la reputacion requerida no puede ser negativa")
+		return
+	}
+
+	creado := s.Storage.CrearBadge(nuevo)
+	RespondJSON(w, http.StatusCreated, creado)
 }
