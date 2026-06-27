@@ -8,6 +8,7 @@ import (
 	chimw "github.com/go-chi/chi/v5/middleware"
 
 	"marketplace-api/internal/handlers"
+	"marketplace-api/internal/routes"
 	"marketplace-api/internal/storage"
 )
 
@@ -22,73 +23,17 @@ func main() {
 	almacen.SeedUsermissions()
 
 	servidor := handlers.NewServer(almacen)
-	// 4. Router + middleware.
+
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
 
-	// 5. Rutas versionadas /api/v1/.
 	r.Route("/api/v1", func(r chi.Router) {
-		// MODULO 1
-		// Users
-		r.Get("/users", servidor.ListarUsers)
-		r.Post("/users", servidor.CrearUser)
-		r.Get("/users/{id}", servidor.ObtenerUser)
-		r.Put("/users/{id}", servidor.ActualizarUser)
-		r.Delete("/users/{id}", servidor.BorrarUser)
 
-		// Reviews
-		r.Get("/reviews", servidor.ListarReviews)
-		r.Get("/reviews/{id}", servidor.ObteneReview)
-		r.Post("/reviews", servidor.CrearReview)
-		r.Put("/reviews/{id}", servidor.ActualizarReview)
-		r.Delete("/reviews/{id}", servidor.BorrarReview)
+		routes.PerfiñRoutes(r, servidor)
+		routes.MarketplaceRoutes(r, servidor)
+		routes.ComunidadRoutes(r, servidor)
 
-		// Badges
-		r.Get("/badges", servidor.ListarBadges)
-		r.Get("/badges/{id}", servidor.ObteneBadge)
-		r.Post("/badges", servidor.CrearBadge)
-		r.Put("/badges/{id}", servidor.ActualizarBadge)
-		r.Delete("/badges/{id}", servidor.BorrarBadge)
-
-		// MODULO 2
-		r.Get("/categorias", servidor.ListarCategorias)
-		r.Get("/categorias/{id}", servidor.ObtenerCategoria)
-		r.Post("/categorias", servidor.CrearCategoria)
-		r.Put("/categorias/{id}", servidor.ActualizarCategoria)
-		r.Delete("/categorias/{id}", servidor.BorrarCategoria)
-
-		r.Get("/productos", servidor.ListarProductos)
-		r.Get("/productos/{id}", servidor.ObtenerProducto)
-		r.Post("/productos", servidor.CrearProducto)
-		r.Put("/productos/{id}", servidor.ActualizarProducto)
-		r.Delete("/productos/{id}", servidor.BorrarProducto)
-
-		r.Get("/ordenes", servidor.ListarOrdenes)
-		r.Get("/ordenes/{id}", servidor.ObtenerOrden)
-		r.Post("/ordenes", servidor.CrearOrden)
-		r.Put("/ordenes/{id}", servidor.ActualizarOrden)
-		r.Delete("/ordenes/{id}", servidor.BorrarOrden)
-
-		// MODULO 3
-		///messages
-		r.Get("/messages", servidor.ListarMessages)
-		r.Get("/messages/{id}", servidor.ObtenerMessage)
-		r.Post("/messages", servidor.CrearMessage)
-		r.Put("/messages/{id}", servidor.ActualizarMessage)
-		r.Delete("/messages/{id}", servidor.BorrarMessage)
-		///missions
-		r.Get("/missions", servidor.ListarMissions)
-		r.Get("/missions/{id}", servidor.ObtenerMision)
-		r.Post("/missions", servidor.CrearMision)
-		r.Put("/missions/{id}", servidor.ActualizarMision)
-		r.Delete("/missions/{id}", servidor.BorrarMision)
-		///usermissions
-		r.Get("/usermissions", servidor.ListarUsermissions)
-		r.Get("/usermissions/{id}", servidor.ObtenerUserMission)
-		r.Post("/usermissions", servidor.CrearUserMission)
-		r.Put("/usermissions/{id}", servidor.ActualizarUserMission)
-		r.Delete("/usermissions/{id}", servidor.BorrarUserMission)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
