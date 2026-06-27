@@ -447,7 +447,53 @@ func (a *AlmacenSQLC) BorrarUserMission(id int) bool {
 // MENSAJES
 // =====================================
 
-func (a *AlmacenSQLC) ListarMensajes() []models.Message {
-	// sqlc NO lo incluiste en el snippet de Queries, pero asumo existe
-	return nil
+func (a *AlmacenSQLC) Listarmena() []models.Message {
+	rows, err := a.q.ListarMensajes(context.Background())
+	if err != nil {
+		return nil
+	}
+
+	out := make([]models.Message, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, aMensaje(r))
+	}
+	return out
+}
+
+func (a *AlmacenSQLC) BuscarMensajePorID(id int) (models.Message, bool) {
+	r, err := a.q.BuscarMensajePorID(context.Background(), int64(id))
+	if err != nil {
+		return models.Message{}, false
+	}
+	return aMensaje(r), true
+}
+
+func (a *AlmacenSQLC) CrearMensaje(m models.Message) models.Message {
+	r, err := a.q.CrearMensaje(context.Background(), sqlcdb.CrearMensajeParams{
+		SenderID:   int64(m.SenderID),
+		ReceiverID: int64(m.ReceiverID),
+		Content:    m.Content,
+	})
+	if err != nil {
+		return models.Message{}
+	}
+	return aMensaje(r)
+}
+
+func (a *AlmacenSQLC) ActualizarMensaje(id int, m models.Message) (models.Message, bool) {
+	r, err := a.q.ActualizarMensaje(context.Background(), sqlcdb.ActualizarMensajeParams{
+		SenderID:   int64(m.SenderID),
+		ReceiverID: int64(m.ReceiverID),
+		Content:    m.Content,
+		ID:         int64(id),
+	})
+	if err != nil {
+		return models.Message{}, false
+	}
+	return aMensaje(r), true
+}
+
+func (a *AlmacenSQLC) BorrarMensaje(id int) bool {
+	n, err := a.q.BorrarMensaje(context.Background(), int64(id))
+	return err == nil && n > 0
 }
