@@ -4,7 +4,7 @@ import (
 	"marketplace-api/internal/models"
 )
 
-type Almacen interface {
+type PerfilRepository interface {
 	// MODULO 1
 	// Users
 	ListarUsers() []models.User
@@ -26,6 +26,8 @@ type Almacen interface {
 	CrearBadge(u models.Badge) models.Badge
 	ActualizarBadge(id int, datos models.Badge) (models.Badge, bool)
 	BorrarBadge(id int) bool
+}
+type OrdenRepository interface {
 
 	// MODULO 2
 	// Categorias
@@ -48,9 +50,10 @@ type Almacen interface {
 	CrearOrden(o models.Orden) models.Orden
 	ActualizarOrden(id int, datos models.Orden) (models.Orden, bool)
 	BorrarOrden(id int) bool
+}
+type ComunidadRepository interface {
 
 	// MODULO 3
-
 	// Messages
 	ListarMessages() []models.Message
 	BuscarMessagePorID(id int) (models.Message, bool)
@@ -69,4 +72,9 @@ type Almacen interface {
 	CrearUserMission(userMission models.UserMission) models.UserMission
 	ActualizarUserMission(id int, datos models.UserMission) (models.UserMission, bool)
 	BorrarUserMission(id int) bool
+}
+type Almacen interface {
+	PerfilRepository
+	OrdenRepository
+	ComunidadRepository
 }
