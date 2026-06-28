@@ -3,12 +3,16 @@ package routes
 import (
 	"marketplace-api/internal/handlers"
 	"marketplace-api/internal/middleware"
+	"marketplace-api/internal/service"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func MarketplaceRoutes(r chi.Router, s *handlers.Server) {
-
+func MarketplaceRoutes(
+	r chi.Router,
+	s *handlers.Server,
+	authSvc *service.AuthService,
+) {
 	// Rutas públicas (solo lectura)
 	r.Get("/categorias", s.ListarCategorias)
 	r.Get("/categorias/{id}", s.ObtenerCategoria)
@@ -19,7 +23,7 @@ func MarketplaceRoutes(r chi.Router, s *handlers.Server) {
 
 	// Rutas protegidas (requieren token)
 	r.Group(func(r chi.Router) {
-		r.Use(middleware.RequiereToken)
+		r.Use(middleware.Auth(authSvc))
 
 		r.Post("/categorias", s.CrearCategoria)
 		r.Put("/categorias/{id}", s.ActualizarCategoria)

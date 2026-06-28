@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func setupDBTest(t *testing.T) *gorm.DB {
+func setupOrdenDBTest(t *testing.T) *gorm.DB {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("no se pudo abrir la base de datos en memoria: %v", err)
@@ -22,13 +22,18 @@ func setupDBTest(t *testing.T) *gorm.DB {
 	return db
 }
 
-func TestOrdenRepo_Crear_Listar(t *testing.T) {
-	db := setupDBTest(t)
+func TestOrden_Crear_Buscar_Listar(t *testing.T) {
+	db := setupOrdenDBTest(t)
 
-	// Crear categoría y producto primero por las foreign keys
+	// CREAR categoria primero por foreign key
 	categoria := models.Categoria{Name: "Libros"}
 	db.Create(&categoria)
 
+	if categoria.ID == 0 {
+		t.Fatalf("esperaba ID generado para categoria")
+	}
+
+	// CREAR producto por foreign key
 	producto := models.Producto{
 		Nombre:      "Cálculo",
 		Descripcion: "Libro de cálculo",
@@ -37,7 +42,11 @@ func TestOrdenRepo_Crear_Listar(t *testing.T) {
 	}
 	db.Create(&producto)
 
-	// Crear orden
+	if producto.ID == 0 {
+		t.Fatalf("esperaba ID generado para producto")
+	}
+
+	// CREAR orden
 	orden := models.Orden{
 		ProductoID:  producto.ID,
 		IDComprador: 1,
@@ -45,7 +54,21 @@ func TestOrdenRepo_Crear_Listar(t *testing.T) {
 	}
 	db.Create(&orden)
 
-	// Listar y verificar
+	if orden.ID == 0 {
+		t.Fatalf("esperaba ID generado para orden")
+	}
+
+	// BUSCAR
+	var encontrada models.Orden
+	err := db.First(&encontrada, orden.ID).Error
+	if err != nil {
+		t.Fatalf("no se pudo encontrar la orden")
+	}
+	if encontrada.Estado != "pendiente" {
+		t.Fatalf("estado incorrecto")
+	}
+
+	// LISTAR
 	var ordenes []models.Orden
 	db.Find(&ordenes)
 
@@ -53,6 +76,6 @@ func TestOrdenRepo_Crear_Listar(t *testing.T) {
 		t.Fatalf("esperado 1 orden, obtenido %d", len(ordenes))
 	}
 	if ordenes[0].Estado != "pendiente" {
-		t.Fatalf("estado esperado 'pendiente', obtenido '%s'", ordenes[0].Estado)
+		t.Fatalf("dato incorrecto en lista")
 	}
 }

@@ -37,6 +37,23 @@ func aUser(u sqlcdb.Usuario) models.User {
 	}
 }
 
+func aCategoria(c sqlcdb.Categoria) models.Categoria {
+	return models.Categoria{
+		ID:   int(c.ID),
+		Name: c.Nombre,
+	}
+}
+
+func aProducto(p sqlcdb.Producto) models.Producto {
+	return models.Producto{
+		ID:          int(p.ID),
+		Nombre:      p.Nombre,
+		Descripcion: p.Descripcion,
+		Precio:      p.Precio,
+		CategoriaID: uint(p.CategoriaID),
+	}
+}
+
 func aReview(r sqlcdb.Review) models.Review {
 	return models.Review{
 		ID:         int(r.ID),
@@ -53,23 +70,6 @@ func aBadge(b sqlcdb.Badge) models.Badge {
 		Name:        b.Nombre,
 		Description: b.Descripcion,
 		RequiredRep: int(b.RequiredRep),
-	}
-}
-
-func aCategoria(c sqlcdb.Categoria) models.Categoria {
-	return models.Categoria{
-		ID:   int(c.ID),
-		Name: c.Nombre,
-	}
-}
-
-func aProducto(p sqlcdb.Producto) models.Producto {
-	return models.Producto{
-		ID:          int(p.ID),
-		Nombre:      p.Nombre,
-		Descripcion: p.Descripcion,
-		Precio:      p.Precio,
-		CategoriaID: uint(p.CategoriaID),
 	}
 }
 
@@ -170,126 +170,14 @@ func (a *AlmacenSQLC) BorrarUser(id int) bool {
 }
 
 // =====================================
-// REVIEWS
+// CATEGORIAS
 // =====================================
-
-func (a *AlmacenSQLC) ListarReviews() []models.Review {
-	rows, err := a.q.ListarReviews(context.Background())
-	if err != nil {
-		return nil
-	}
-
-	out := make([]models.Review, 0, len(rows))
-	for _, r := range rows {
-		out = append(out, aReview(r))
-	}
-	return out
-}
-
-func (a *AlmacenSQLC) BuscarReviewPorID(id int) (models.Review, bool) {
-	r, err := a.q.BuscarReviewPorID(context.Background(), int64(id))
-	if err != nil {
-		return models.Review{}, false
-	}
-	return aReview(r), true
-}
-
-func (a *AlmacenSQLC) CrearReview(r models.Review) models.Review {
-	row, err := a.q.CrearReview(context.Background(), sqlcdb.CrearReviewParams{
-		ReviewerID: int64(r.ReviewerID),
-		ReviewedID: int64(r.ReviewedID),
-		Rating:     int64(r.Rating),
-		Comment:    r.Comment,
-	})
-	if err != nil {
-		return models.Review{}
-	}
-	return aReview(row)
-}
-
-func (a *AlmacenSQLC) ActualizarReview(id int, r models.Review) (models.Review, bool) {
-	row, err := a.q.ActualizarReview(context.Background(), sqlcdb.ActualizarReviewParams{
-		ReviewerID: int64(r.ReviewerID),
-		ReviewedID: int64(r.ReviewedID),
-		Rating:     int64(r.Rating),
-		Comment:    r.Comment,
-		ID:         int64(id),
-	})
-	if err != nil {
-		return models.Review{}, false
-	}
-	return aReview(row), true
-}
-
-func (a *AlmacenSQLC) BorrarReview(id int) bool {
-	n, err := a.q.BorrarReview(context.Background(), int64(id))
-	return err == nil && n > 0
-}
-
-// =====================================
-// BADGES
-// =====================================
-
-func (a *AlmacenSQLC) ListarBadges() []models.Badge {
-	rows, err := a.q.ListarBadges(context.Background())
-	if err != nil {
-		return nil
-	}
-
-	out := make([]models.Badge, 0, len(rows))
-	for _, r := range rows {
-		out = append(out, aBadge(r))
-	}
-	return out
-}
-
-func (a *AlmacenSQLC) BuscarBadgePorID(id int) (models.Badge, bool) {
-	r, err := a.q.BuscarBadgePorID(context.Background(), int64(id))
-	if err != nil {
-		return models.Badge{}, false
-	}
-	return aBadge(r), true
-}
-
-func (a *AlmacenSQLC) CrearBadge(b models.Badge) models.Badge {
-	r, err := a.q.CrearBadge(context.Background(), sqlcdb.CrearBadgeParams{
-		Nombre:      b.Name,
-		Descripcion: b.Description,
-		RequiredRep: int64(b.RequiredRep),
-	})
-	if err != nil {
-		return models.Badge{}
-	}
-	return aBadge(r)
-}
-
-func (a *AlmacenSQLC) ActualizarBadge(id int, b models.Badge) (models.Badge, bool) {
-	r, err := a.q.ActualizarBadge(context.Background(), sqlcdb.ActualizarBadgeParams{
-		Nombre:      b.Name,
-		Descripcion: b.Description,
-		RequiredRep: int64(b.RequiredRep),
-		ID:          int64(id),
-	})
-	if err != nil {
-		return models.Badge{}, false
-	}
-	return aBadge(r), true
-}
-
-func (a *AlmacenSQLC) BorrarBadge(id int) bool {
-	n, err := a.q.BorrarBadge(context.Background(), int64(id))
-	return err == nil && n > 0
-}
-
-// =====================================
-// Categoria
-// =====================================
-
 func (a *AlmacenSQLC) ListarCategorias() []models.Categoria {
 	rows, err := a.q.ListarCategorias(context.Background())
 	if err != nil {
 		return nil
 	}
+
 	out := make([]models.Categoria, 0, len(rows))
 	for _, r := range rows {
 		out = append(out, aCategoria(r))
@@ -298,11 +186,11 @@ func (a *AlmacenSQLC) ListarCategorias() []models.Categoria {
 }
 
 func (a *AlmacenSQLC) BuscarCategoriaPorID(id int) (models.Categoria, bool) {
-	r, err := a.q.BuscarCategoriaPorID(context.Background(), int64(id))
+	c, err := a.q.BuscarCategoriaPorID(context.Background(), int64(id))
 	if err != nil {
 		return models.Categoria{}, false
 	}
-	return aCategoria(r), true
+	return aCategoria(c), true
 }
 
 func (a *AlmacenSQLC) CrearCategoria(c models.Categoria) models.Categoria {
@@ -338,13 +226,10 @@ func (a *AlmacenSQLC) ListarProductos() []models.Producto {
 	if err != nil {
 		return nil
 	}
+
 	out := make([]models.Producto, 0, len(rows))
 	for _, r := range rows {
-		producto := aProducto(r)
-		if cat, ok := a.BuscarCategoriaPorID(int(r.CategoriaID)); ok {
-			producto.Categoria = cat
-		}
-		out = append(out, producto)
+		out = append(out, aProducto(r))
 	}
 	return out
 }
@@ -354,11 +239,7 @@ func (a *AlmacenSQLC) BuscarProductoPorID(id int) (models.Producto, bool) {
 	if err != nil {
 		return models.Producto{}, false
 	}
-	producto := aProducto(r)
-	if cat, ok := a.BuscarCategoriaPorID(int(r.CategoriaID)); ok {
-		producto.Categoria = cat
-	}
-	return producto, true
+	return aProducto(r), true
 }
 
 func (a *AlmacenSQLC) CrearProducto(p models.Producto) models.Producto {
@@ -472,6 +353,118 @@ func (a *AlmacenSQLC) ActualizarOrden(id int, o models.Orden) (models.Orden, boo
 
 func (a *AlmacenSQLC) BorrarOrden(id int) bool {
 	n, err := a.q.BorrarOrden(context.Background(), int64(id))
+	return err == nil && n > 0
+}
+
+// =====================================
+// REVIEWS
+// =====================================
+
+func (a *AlmacenSQLC) ListarReviews() []models.Review {
+	rows, err := a.q.ListarReviews(context.Background())
+	if err != nil {
+		return nil
+	}
+
+	out := make([]models.Review, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, aReview(r))
+	}
+	return out
+}
+
+func (a *AlmacenSQLC) BuscarReviewPorID(id int) (models.Review, bool) {
+	r, err := a.q.BuscarReviewPorID(context.Background(), int64(id))
+	if err != nil {
+		return models.Review{}, false
+	}
+	return aReview(r), true
+}
+
+func (a *AlmacenSQLC) CrearReview(r models.Review) models.Review {
+	row, err := a.q.CrearReview(context.Background(), sqlcdb.CrearReviewParams{
+		ReviewerID: int64(r.ReviewerID),
+		ReviewedID: int64(r.ReviewedID),
+		Rating:     int64(r.Rating),
+		Comment:    r.Comment,
+	})
+	if err != nil {
+		return models.Review{}
+	}
+	return aReview(row)
+}
+
+func (a *AlmacenSQLC) ActualizarReview(id int, r models.Review) (models.Review, bool) {
+	row, err := a.q.ActualizarReview(context.Background(), sqlcdb.ActualizarReviewParams{
+		ReviewerID: int64(r.ReviewerID),
+		ReviewedID: int64(r.ReviewedID),
+		Rating:     int64(r.Rating),
+		Comment:    r.Comment,
+		ID:         int64(id),
+	})
+	if err != nil {
+		return models.Review{}, false
+	}
+	return aReview(row), true
+}
+
+func (a *AlmacenSQLC) BorrarReview(id int) bool {
+	n, err := a.q.BorrarReview(context.Background(), int64(id))
+	return err == nil && n > 0
+}
+
+// =====================================
+// BADGES
+// =====================================
+
+func (a *AlmacenSQLC) ListarBadges() []models.Badge {
+	rows, err := a.q.ListarBadges(context.Background())
+	if err != nil {
+		return nil
+	}
+
+	out := make([]models.Badge, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, aBadge(r))
+	}
+	return out
+}
+
+func (a *AlmacenSQLC) BuscarBadgePorID(id int) (models.Badge, bool) {
+	r, err := a.q.BuscarBadgePorID(context.Background(), int64(id))
+	if err != nil {
+		return models.Badge{}, false
+	}
+	return aBadge(r), true
+}
+
+func (a *AlmacenSQLC) CrearBadge(b models.Badge) models.Badge {
+	r, err := a.q.CrearBadge(context.Background(), sqlcdb.CrearBadgeParams{
+		Nombre:      b.Name,
+		Descripcion: b.Description,
+		RequiredRep: int64(b.RequiredRep),
+	})
+	if err != nil {
+		return models.Badge{}
+	}
+	return aBadge(r)
+}
+
+func (a *AlmacenSQLC) ActualizarBadge(id int, b models.Badge) (models.Badge, bool) {
+	r, err := a.q.ActualizarBadge(context.Background(), sqlcdb.ActualizarBadgeParams{
+		Nombre:      b.Name,
+		Descripcion: b.Description,
+		RequiredRep: int64(b.RequiredRep),
+		ID:          int64(id),
+	})
+	if err != nil {
+		return models.Badge{}, false
+	}
+	return aBadge(r), true
+}
+
+func (a *AlmacenSQLC) BorrarBadge(id int) bool {
+	n, err := a.q.BorrarBadge(context.Background(), int64(id))
 	return err == nil && n > 0
 }
 
@@ -591,7 +584,53 @@ func (a *AlmacenSQLC) BorrarUserMission(id int) bool {
 // MENSAJES
 // =====================================
 
-func (a *AlmacenSQLC) ListarMensajes() []models.Message {
-	// sqlc NO lo incluiste en el snippet de Queries, pero asumo existe
-	return nil
+func (a *AlmacenSQLC) ListarMessages() []models.Message {
+	rows, err := a.q.ListarMensajes(context.Background())
+	if err != nil {
+		return nil
+	}
+
+	out := make([]models.Message, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, aMensaje(r))
+	}
+	return out
+}
+
+func (a *AlmacenSQLC) BuscarMessagePorID(id int) (models.Message, bool) {
+	r, err := a.q.BuscarMensajePorID(context.Background(), int64(id))
+	if err != nil {
+		return models.Message{}, false
+	}
+	return aMensaje(r), true
+}
+
+func (a *AlmacenSQLC) CrearMessage(m models.Message) models.Message {
+	r, err := a.q.CrearMensaje(context.Background(), sqlcdb.CrearMensajeParams{
+		SenderID:   int64(m.SenderID),
+		ReceiverID: int64(m.ReceiverID),
+		Content:    m.Content,
+	})
+	if err != nil {
+		return models.Message{}
+	}
+	return aMensaje(r)
+}
+
+func (a *AlmacenSQLC) ActualizarMessage(id int, m models.Message) (models.Message, bool) {
+	r, err := a.q.ActualizarMensaje(context.Background(), sqlcdb.ActualizarMensajeParams{
+		SenderID:   int64(m.SenderID),
+		ReceiverID: int64(m.ReceiverID),
+		Content:    m.Content,
+		ID:         int64(id),
+	})
+	if err != nil {
+		return models.Message{}, false
+	}
+	return aMensaje(r), true
+}
+
+func (a *AlmacenSQLC) BorrarMessage(id int) bool {
+	n, err := a.q.BorrarMensaje(context.Background(), int64(id))
+	return err == nil && n > 0
 }

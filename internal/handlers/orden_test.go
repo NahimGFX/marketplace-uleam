@@ -2,141 +2,212 @@ package handlers_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/stretchr/testify/assert"
 
 	"marketplace-api/internal/handlers"
 	"marketplace-api/internal/middleware"
 	"marketplace-api/internal/models"
-
-	"github.com/go-chi/chi/v5"
+	"marketplace-api/internal/service"
+	"marketplace-api/internal/storage"
 )
 
-// Fake en memoria para los handlers
+// =======================
+// FAKE EN MEMORIA
+// =======================
+
 type fakeOrdenStore struct {
 	ordenes []models.Orden
+	next    int
 }
 
-func (f *fakeOrdenStore) ListarUsers() []models.User                               { return nil }
-func (f *fakeOrdenStore) BuscarUserPorID(id int) (models.User, bool)               { return models.User{}, false }
-func (f *fakeOrdenStore) CrearUser(u models.User) models.User                      { return u }
-func (f *fakeOrdenStore) ActualizarUser(id int, u models.User) (models.User, bool) { return u, true }
-func (f *fakeOrdenStore) BorrarUser(id int) bool                                   { return true }
-func (f *fakeOrdenStore) ListarReviews() []models.Review                           { return nil }
-func (f *fakeOrdenStore) BuscarReviewPorID(id int) (models.Review, bool) {
-	return models.Review{}, false
+func nuevoFakeOrdenStore() *fakeOrdenStore {
+	return &fakeOrdenStore{
+		ordenes: []models.Orden{},
+	}
 }
-func (f *fakeOrdenStore) CrearReview(r models.Review) models.Review { return r }
-func (f *fakeOrdenStore) ActualizarReview(id int, r models.Review) (models.Review, bool) {
-	return r, true
+
+// =======================
+// ORDENES
+// =======================
+
+func (f *fakeOrdenStore) ListarOrdenes() []models.Orden {
+	return f.ordenes
 }
-func (f *fakeOrdenStore) BorrarReview(id int) bool                                    { return true }
-func (f *fakeOrdenStore) ListarBadges() []models.Badge                                { return nil }
-func (f *fakeOrdenStore) BuscarBadgePorID(id int) (models.Badge, bool)                { return models.Badge{}, false }
-func (f *fakeOrdenStore) CrearBadge(b models.Badge) models.Badge                      { return b }
-func (f *fakeOrdenStore) ActualizarBadge(id int, b models.Badge) (models.Badge, bool) { return b, true }
-func (f *fakeOrdenStore) BorrarBadge(id int) bool                                     { return true }
-func (f *fakeOrdenStore) ListarCategorias() []models.Categoria                        { return nil }
+
+func (f *fakeOrdenStore) BuscarOrdenPorID(id int) (models.Orden, bool) {
+	for _, o := range f.ordenes {
+		if o.ID == id {
+			return o, true
+		}
+	}
+	return models.Orden{}, false
+}
+
+func (f *fakeOrdenStore) CrearOrden(o models.Orden) models.Orden {
+	f.next++
+	o.ID = f.next
+	f.ordenes = append(f.ordenes, o)
+	return o
+}
+
+func (f *fakeOrdenStore) ActualizarOrden(id int, o models.Orden) (models.Orden, bool) {
+	return o, false
+}
+
+func (f *fakeOrdenStore) BorrarOrden(id int) bool {
+	return false
+}
+
+// =======================
+// CUMPLIR INTERFAZ
+// =======================
+
+func (f *fakeOrdenStore) ListarCategorias() []models.Categoria { return nil }
 func (f *fakeOrdenStore) BuscarCategoriaPorID(id int) (models.Categoria, bool) {
 	return models.Categoria{}, false
 }
 func (f *fakeOrdenStore) CrearCategoria(c models.Categoria) models.Categoria { return c }
 func (f *fakeOrdenStore) ActualizarCategoria(id int, c models.Categoria) (models.Categoria, bool) {
-	return c, true
+	return c, false
 }
-func (f *fakeOrdenStore) BorrarCategoria(id int) bool        { return true }
+func (f *fakeOrdenStore) BorrarCategoria(id int) bool        { return false }
 func (f *fakeOrdenStore) ListarProductos() []models.Producto { return nil }
 func (f *fakeOrdenStore) BuscarProductoPorID(id int) (models.Producto, bool) {
 	return models.Producto{}, false
 }
 func (f *fakeOrdenStore) CrearProducto(p models.Producto) models.Producto { return p }
 func (f *fakeOrdenStore) ActualizarProducto(id int, p models.Producto) (models.Producto, bool) {
-	return p, true
+	return p, false
 }
-func (f *fakeOrdenStore) BorrarProducto(id int) bool                   { return true }
-func (f *fakeOrdenStore) ListarOrdenes() []models.Orden                { return f.ordenes }
-func (f *fakeOrdenStore) BuscarOrdenPorID(id int) (models.Orden, bool) { return models.Orden{}, false }
-func (f *fakeOrdenStore) CrearOrden(o models.Orden) models.Orden {
-	f.ordenes = append(f.ordenes, o)
-	return o
-}
-func (f *fakeOrdenStore) ActualizarOrden(id int, o models.Orden) (models.Orden, bool) { return o, true }
-func (f *fakeOrdenStore) BorrarOrden(id int) bool                                     { return true }
-func (f *fakeOrdenStore) ListarMessages() []models.Message                            { return nil }
-func (f *fakeOrdenStore) BuscarMessagePorID(id int) (models.Message, bool) {
-	return models.Message{}, false
-}
-func (f *fakeOrdenStore) CrearMessage(m models.Message) models.Message { return m }
-func (f *fakeOrdenStore) ActualizarMessage(id int, m models.Message) (models.Message, bool) {
-	return m, true
-}
-func (f *fakeOrdenStore) BorrarMessage(id int) bool        { return true }
-func (f *fakeOrdenStore) ListarMissions() []models.Mission { return nil }
-func (f *fakeOrdenStore) BuscarMisionPorID(id int) (models.Mission, bool) {
-	return models.Mission{}, false
-}
-func (f *fakeOrdenStore) CrearMision(m models.Mission) models.Mission { return m }
-func (f *fakeOrdenStore) ActualizarMision(id int, m models.Mission) (models.Mission, bool) {
-	return m, true
-}
-func (f *fakeOrdenStore) BorrarMision(id int) bool                 { return true }
-func (f *fakeOrdenStore) ListarUsermissions() []models.UserMission { return nil }
-func (f *fakeOrdenStore) BuscarUserMissionPorID(id int) (models.UserMission, bool) {
-	return models.UserMission{}, false
-}
-func (f *fakeOrdenStore) CrearUserMission(m models.UserMission) models.UserMission { return m }
-func (f *fakeOrdenStore) ActualizarUserMission(id int, m models.UserMission) (models.UserMission, bool) {
-	return m, true
-}
-func (f *fakeOrdenStore) BorrarUserMission(id int) bool { return true }
+func (f *fakeOrdenStore) BorrarProducto(id int) bool { return false }
 
-func setupRouter(s *handlers.Server) http.Handler {
+var _ storage.OrdenRepository = (*fakeOrdenStore)(nil)
+
+// =======================
+// JWT REAL
+// =======================
+
+func generarJWTValidoOrden() string {
+	secret := []byte("marketplace-uleam-secreto-demo-cambiar-en-S12")
+	claims := service.Claims{
+		UsuarioID: 1,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	s, _ := token.SignedString(secret)
+	return s
+}
+
+// =======================
+// ENTORNO DE TEST
+// =======================
+
+func construirEntornoOrden() http.Handler {
+	repo := nuevoFakeOrdenStore()
+	ordenSvc := service.NewOrdenService(repo)
+	authSvc := service.NuevoAuthService(nil)
+
+	server := handlers.NewServer(
+		nil,
+		nil,
+		nil,
+		authSvc,
+		nil,
+		nil,
+		ordenSvc,
+	)
+
 	r := chi.NewRouter()
-	r.Get("/api/v1/ordenes", s.ListarOrdenes)
-	r.Group(func(r chi.Router) {
-		r.Use(middleware.RequiereToken)
-		r.Post("/api/v1/ordenes", s.CrearOrden)
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Get("/ordenes", server.ListarOrdenes)
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Auth(authSvc))
+			r.Post("/ordenes", server.CrearOrden)
+		})
 	})
+
 	return r
 }
 
-// Test 1: POST /ordenes sin token debe responder 401
-func TestCrearOrden_SinToken_Retorna401(t *testing.T) {
-	fake := &fakeOrdenStore{}
-	srv := handlers.NewServer(fake)
-	r := setupRouter(srv)
+// =======================
+// TEST 1: 201 CREATED
+// =======================
 
-	body, _ := json.Marshal(models.Orden{
-		ProductoID:  1,
-		IDComprador: 1,
-		Estado:      "pendiente",
-	})
+func TestCrearOrden_OK(t *testing.T) {
+	h := construirEntornoOrden()
+	token := generarJWTValidoOrden()
 
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/ordenes", bytes.NewReader(body))
+	body := `{
+		"producto_id":1,
+		"comprador_id":1,
+		"estado":"pendiente"
+	}`
+
+	req := httptest.NewRequest(
+		http.MethodPost,
+		"/api/v1/ordenes",
+		bytes.NewBufferString(body),
+	)
 	req.Header.Set("Content-Type", "application/json")
-	// Sin header Authorization
+	req.Header.Set("Authorization", "Bearer "+token)
 
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
 
-	if w.Code != http.StatusUnauthorized {
-		t.Fatalf("esperado 401, obtenido %d", w.Code)
-	}
+	assert.Equal(t, http.StatusCreated, rec.Code)
 }
 
-// Test 2: GET /ordenes debe responder 200 con lista vacía
-func TestListarOrdenes_Retorna200(t *testing.T) {
-	fake := &fakeOrdenStore{}
-	srv := handlers.NewServer(fake)
-	r := setupRouter(srv)
+// =======================
+// TEST 2: LISTAR 200 OK
+// =======================
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/ordenes", nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
+func TestListarOrdenes(t *testing.T) {
+	h := construirEntornoOrden()
 
-	if w.Code != http.StatusOK {
-		t.Fatalf("esperado 200, obtenido %d", w.Code)
-	}
+	req := httptest.NewRequest(
+		http.MethodGet,
+		"/api/v1/ordenes",
+		nil,
+	)
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+}
+
+// =======================
+// TEST 3: 401 SIN TOKEN
+// =======================
+
+func TestCrearOrden_SinToken(t *testing.T) {
+	h := construirEntornoOrden()
+
+	body := `{
+		"producto_id":1,
+		"comprador_id":1,
+		"estado":"pendiente"
+	}`
+
+	req := httptest.NewRequest(
+		http.MethodPost,
+		"/api/v1/ordenes",
+		bytes.NewBufferString(body),
+	)
+	req.Header.Set("Content-Type", "application/json")
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }

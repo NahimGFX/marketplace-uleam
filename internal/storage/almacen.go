@@ -37,14 +37,14 @@ type OrdenRepository interface {
 	ActualizarCategoria(id int, datos models.Categoria) (models.Categoria, bool)
 	BorrarCategoria(id int) bool
 
-	// Productos
+	//Productos
 	ListarProductos() []models.Producto
 	BuscarProductoPorID(id int) (models.Producto, bool)
 	CrearProducto(p models.Producto) models.Producto
 	ActualizarProducto(id int, datos models.Producto) (models.Producto, bool)
 	BorrarProducto(id int) bool
 
-	// Ordenes
+	//Ordenes
 	ListarOrdenes() []models.Orden
 	BuscarOrdenPorID(id int) (models.Orden, bool)
 	CrearOrden(o models.Orden) models.Orden
@@ -53,7 +53,6 @@ type OrdenRepository interface {
 }
 type ComunidadRepository interface {
 	// MODULO 3
-
 	// Messages
 	ListarMessages() []models.Message
 	BuscarMessagePorID(id int) (models.Message, bool)
@@ -67,7 +66,7 @@ type ComunidadRepository interface {
 	ActualizarMision(id int, datos models.Mission) (models.Mission, bool)
 	BorrarMision(id int) bool
 	//// UserMissions
-	ListarUsermissions() []models.UserMission
+	ListarUserMissions() []models.UserMission
 	BuscarUserMissionPorID(id int) (models.UserMission, bool)
 	CrearUserMission(userMission models.UserMission) models.UserMission
 	ActualizarUserMission(id int, datos models.UserMission) (models.UserMission, bool)
@@ -77,6 +76,17 @@ type Almacen interface {
 	PerfilRepository
 	OrdenRepository
 	ComunidadRepository
+}
+
+// UserRepository es el contrato de persistencia de usuarios.
+//
+// Ojo: CrearUsuario devuelve error (no comma-ok como el resto). El email
+// duplicado es un fallo real que el AuthService debe poder mapear a 409; aqui
+// la convencion comma-ok ya no alcanza. Es justo el punto que conecta con los
+// errores de dominio de S12.
+type UserRepository interface {
+	CrearUsuario(u models.Usuario) (models.Usuario, error)
+	BuscarUsuarioPorEmail(email string) (models.Usuario, bool)
 }
 
 // Chequeo en tiempo de compilación: si Memoria dejara de cumplir Almacen,

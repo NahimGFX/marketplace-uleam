@@ -1,3 +1,5 @@
+//go:build ignore
+
 package routes
 
 import (
@@ -6,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func PerfiñRoutes(r chi.Router, s *handlers.Server) {
+func PerfilRoutes(r chi.Router, s *handlers.Server) {
 
 	// Users
 	r.Get("/users", s.ListarUsers)

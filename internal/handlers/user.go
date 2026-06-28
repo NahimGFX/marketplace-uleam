@@ -1,3 +1,5 @@
+//go:build ignore
+
 package handlers
 
 import (
@@ -9,18 +11,9 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"marketplace-api/internal/models"
-	"marketplace-api/internal/storage"
 )
 
-type Server struct {
-	Storage storage.Almacen
-}
-
-func NewServer(s storage.Almacen) *Server {
-	return &Server{Storage: s}
-}
-
-// Users
+// // // Users
 
 func (s *Server) ListarUsers(w http.ResponseWriter, _ *http.Request) {
 	users := s.Storage.ListarUsers()
