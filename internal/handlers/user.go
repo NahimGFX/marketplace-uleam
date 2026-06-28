@@ -11,7 +11,7 @@ import (
 	"marketplace-api/internal/models"
 )
 
-// Users
+// // Users
 
 func (s *Server) ListarUsers(w http.ResponseWriter, _ *http.Request) {
 	users := s.Storage.ListarUsers()

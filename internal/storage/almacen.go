@@ -37,14 +37,14 @@ type OrdenRepository interface {
 	ActualizarCategoria(id int, datos models.Categoria) (models.Categoria, bool)
 	BorrarCategoria(id int) bool
 
-	// Productos
+	//Productos
 	ListarProductos() []models.Producto
 	BuscarProductoPorID(id int) (models.Producto, bool)
 	CrearProducto(p models.Producto) models.Producto
 	ActualizarProducto(id int, datos models.Producto) (models.Producto, bool)
 	BorrarProducto(id int) bool
 
-	// Ordenes
+	//Ordenes
 	ListarOrdenes() []models.Orden
 	BuscarOrdenPorID(id int) (models.Orden, bool)
 	CrearOrden(o models.Orden) models.Orden
