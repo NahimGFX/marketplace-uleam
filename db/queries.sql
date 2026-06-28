@@ -96,6 +96,29 @@ WHERE id = ?;
 
 --Modulo 2
 -- ==========================================
+-- categorias
+-- ==========================================
+-- name: ListarCategorias :many
+SELECT id, nombre FROM categorias;
+
+-- name: BuscarCategoriaPorID :one
+SELECT id, nombre FROM categorias WHERE id = ?;
+
+-- name: CrearCategoria :one
+INSERT INTO categorias (nombre)
+VALUES (?)
+RETURNING id, nombre;
+
+-- name: ActualizarCategoria :one
+UPDATE categorias
+SET nombre = ?
+WHERE id = ?
+RETURNING id, nombre;
+
+-- name: BorrarCategoria :execrows
+DELETE FROM categorias
+WHERE id = ?;
+-- ==========================================
 -- PRODUCTOS
 -- ==========================================
 
@@ -221,4 +244,35 @@ RETURNING id, user_id, mission_id, completed;
 
 -- name: BorrarUserMission :execrows
 DELETE FROM user_missions
+WHERE id = ?;
+
+
+-- ==========================================
+-- MENSAJES
+-- ==========================================
+
+-- name: ListarMensajes :many
+SELECT id, sender_id, receiver_id, content
+FROM mensajes;
+
+-- name: BuscarMensajePorID :one
+SELECT id, sender_id, receiver_id, content
+FROM mensajes
+WHERE id = ?;
+
+-- name: CrearMensaje :one
+INSERT INTO mensajes (sender_id, receiver_id, content)
+VALUES (?, ?, ?)
+RETURNING id, sender_id, receiver_id, content;
+
+-- name: ActualizarMensaje :one
+UPDATE mensajes
+SET sender_id = ?,
+    receiver_id = ?,
+    content = ?
+WHERE id = ?
+RETURNING id, sender_id, receiver_id, content;
+
+-- name: BorrarMensaje :execrows
+DELETE FROM mensajes
 WHERE id = ?;

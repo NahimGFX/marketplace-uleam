@@ -4,7 +4,7 @@ import (
 	"marketplace-api/internal/models"
 )
 
-type Almacen interface {
+type PerfilRepository interface {
 	// MODULO 1
 	// Users
 	ListarUsers() []models.User
@@ -26,6 +26,8 @@ type Almacen interface {
 	CrearBadge(u models.Badge) models.Badge
 	ActualizarBadge(id int, datos models.Badge) (models.Badge, bool)
 	BorrarBadge(id int) bool
+}
+type OrdenRepository interface {
 
 	// MODULO 2
 	// Categorias
@@ -48,9 +50,10 @@ type Almacen interface {
 	CrearOrden(o models.Orden) models.Orden
 	ActualizarOrden(id int, datos models.Orden) (models.Orden, bool)
 	BorrarOrden(id int) bool
+}
+type ComunidadRepository interface {
 
 	// MODULO 3
-
 	// Messages
 	ListarMessages() []models.Message
 	BuscarMessagePorID(id int) (models.Message, bool)
@@ -64,9 +67,29 @@ type Almacen interface {
 	ActualizarMision(id int, datos models.Mission) (models.Mission, bool)
 	BorrarMision(id int) bool
 	//// UserMissions
-	ListarUsermissions() []models.UserMission
+	ListarUserMissions() []models.UserMission
 	BuscarUserMissionPorID(id int) (models.UserMission, bool)
 	CrearUserMission(userMission models.UserMission) models.UserMission
 	ActualizarUserMission(id int, datos models.UserMission) (models.UserMission, bool)
 	BorrarUserMission(id int) bool
 }
+type Almacen interface {
+	PerfilRepository
+	OrdenRepository
+	ComunidadRepository
+}
+
+// UserRepository es el contrato de persistencia de usuarios.
+//
+// Ojo: CrearUsuario devuelve error (no comma-ok como el resto). El email
+// duplicado es un fallo real que el AuthService debe poder mapear a 409; aqui
+// la convencion comma-ok ya no alcanza. Es justo el punto que conecta con los
+// errores de dominio de S12.
+type UserRepository interface {
+	CrearUsuario(u models.Usuario) (models.Usuario, error)
+	BuscarUsuarioPorEmail(email string) (models.Usuario, bool)
+}
+
+// Chequeo en tiempo de compilación: si Memoria dejara de cumplir Almacen,
+// el proyecto NO compila. Red de seguridad opcional.
+var _ Almacen = (*Memoria)(nil)

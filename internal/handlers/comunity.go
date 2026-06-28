@@ -5,59 +5,42 @@ import (
 	"marketplace-api/internal/models"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 )
 
 // /Message handlers
 func (s *Server) ListarMessages(w http.ResponseWriter, _ *http.Request) {
-	messages := s.Storage.ListarMessages()
-	RespondJSON(w, http.StatusOK, messages)
+	RespondJSON(w, http.StatusOK, s.Messages.Listar())
 }
 
 // ObtenerMessage atiende GET /api/v1/mensajes/{id}.
 func (s *Server) ObtenerMessage(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		RespondError(w, http.StatusBadRequest, "id debe ser un numero entero")
 		return
 	}
-
-	message, encontrado := s.Storage.BuscarMessagePorID(id)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "mensaje no encontrado")
+	message, err := s.Messages.Obtener(id)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
 	RespondJSON(w, http.StatusOK, message)
 }
 
 // CrearMessage atiende POST /api/v1/mensajes.
 func (s *Server) CrearMessage(w http.ResponseWriter, r *http.Request) {
 	var nuevo models.Message
-
 	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
-		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		RespondError(w, http.StatusBadRequest, "JSON invalido: "+err.Error())
 		return
 	}
-
-	if nuevo.SenderID <= 0 {
-		RespondError(w, http.StatusBadRequest, "sender_id es obligatorio")
+	creado, err := s.Messages.Crear(nuevo)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
-	if nuevo.ReceiverID <= 0 {
-		RespondError(w, http.StatusBadRequest, "receiver_id es obligatorio")
-		return
-	}
-
-	if strings.TrimSpace(nuevo.Content) == "" {
-		RespondError(w, http.StatusBadRequest, "el contenido del mensaje es obligatorio")
-		return
-	}
-
-	creado := s.Storage.CrearMessage(nuevo)
 	RespondJSON(w, http.StatusCreated, creado)
 }
 
@@ -65,36 +48,19 @@ func (s *Server) CrearMessage(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ActualizarMessage(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		RespondError(w, http.StatusBadRequest, "id debe ser un numero entero")
 		return
 	}
-
 	var datos models.Message
 	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
-		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		RespondError(w, http.StatusBadRequest, "JSON invalido: "+err.Error())
 		return
 	}
-	if datos.SenderID <= 0 {
-		RespondError(w, http.StatusBadRequest, "sender_id es obligatorio")
+	actualizado, err := s.Messages.Actualizar(id, datos)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
-	if datos.ReceiverID <= 0 {
-		RespondError(w, http.StatusBadRequest, "receiver_id es obligatorio")
-		return
-	}
-
-	if strings.TrimSpace(datos.Content) == "" {
-		RespondError(w, http.StatusBadRequest, "el contenido es obligatorio")
-		return
-	}
-
-	actualizado, encontrado := s.Storage.ActualizarMessage(id, datos)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "mensaje no encontrado")
-		return
-	}
-
 	RespondJSON(w, http.StatusOK, actualizado)
 }
 
@@ -102,70 +68,49 @@ func (s *Server) ActualizarMessage(w http.ResponseWriter, r *http.Request) {
 func (s *Server) BorrarMessage(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		RespondError(w, http.StatusBadRequest, "id debe ser un numero entero")
 		return
 	}
-
-	if !s.Storage.BorrarMessage(id) {
-		RespondError(w, http.StatusNotFound, "mensaje no encontrado")
+	if err := s.Messages.Borrar(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
 	RespondJSON(w, http.StatusNoContent, nil)
 }
 
+// *
 // /Misiones handlers
 func (s *Server) ListarMissions(w http.ResponseWriter, _ *http.Request) {
-	missions := s.Storage.ListarMissions()
-	RespondJSON(w, http.StatusOK, missions)
+	RespondJSON(w, http.StatusOK, s.Missions.Listar())
 }
 
 // ObtenerMision atiende GET /api/v1/misiones/{id}.
 func (s *Server) ObtenerMision(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		RespondError(w, http.StatusBadRequest, "id debe ser un numero entero")
 		return
 	}
-
-	mission, encontrado := s.Storage.BuscarMisionPorID(id)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "misión no encontrada")
+	mission, err := s.Missions.Obtener(id)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
 	RespondJSON(w, http.StatusOK, mission)
 }
 
 // CrearMision atiende POST /api/v1/misiones.
 func (s *Server) CrearMision(w http.ResponseWriter, r *http.Request) {
 	var nuevo models.Mission
-
 	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
-		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		RespondError(w, http.StatusBadRequest, "JSON invalido: "+err.Error())
 		return
 	}
-
-	if strings.TrimSpace(nuevo.Title) == "" {
-		RespondError(w, http.StatusBadRequest, "el título es obligatorio")
+	creado, err := s.Missions.Crear(nuevo)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
-	if strings.TrimSpace(nuevo.Description) == "" {
-		RespondError(w, http.StatusBadRequest, "la descripción es obligatoria")
-		return
-	}
-
-	if nuevo.RequiredLevel < 1 {
-		RespondError(w, http.StatusBadRequest, "required_level debe ser mayor que 0")
-		return
-	}
-
-	if nuevo.RewardPoints <= 0 {
-		RespondError(w, http.StatusBadRequest, "reward_points debe ser mayor que 0")
-		return
-	}
-	creado := s.Storage.CrearMision(nuevo)
 	RespondJSON(w, http.StatusCreated, creado)
 }
 
@@ -173,41 +118,19 @@ func (s *Server) CrearMision(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ActualizarMision(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		RespondError(w, http.StatusBadRequest, "id debe ser un numero entero")
 		return
 	}
-
 	var datos models.Mission
 	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
-		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		RespondError(w, http.StatusBadRequest, "JSON invalido: "+err.Error())
 		return
 	}
-	if strings.TrimSpace(datos.Title) == "" {
-		RespondError(w, http.StatusBadRequest, "el título es obligatorio")
+	actualizado, err := s.Missions.Actualizar(id, datos)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
-	if strings.TrimSpace(datos.Description) == "" {
-		RespondError(w, http.StatusBadRequest, "la descripción es obligatoria")
-		return
-	}
-
-	if datos.RequiredLevel < 1 {
-		RespondError(w, http.StatusBadRequest, "required_level debe ser mayor que 0")
-		return
-	}
-
-	if datos.RewardPoints <= 0 {
-		RespondError(w, http.StatusBadRequest, "reward_points debe ser mayor que 0")
-		return
-	}
-
-	actualizado, encontrado := s.Storage.ActualizarMision(id, datos)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "mensaje no encontrado")
-		return
-	}
-
 	RespondJSON(w, http.StatusOK, actualizado)
 }
 
@@ -215,61 +138,48 @@ func (s *Server) ActualizarMision(w http.ResponseWriter, r *http.Request) {
 func (s *Server) BorrarMision(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		RespondError(w, http.StatusBadRequest, "id debe ser un numero entero")
 		return
 	}
-
-	if !s.Storage.BorrarMision(id) {
-		RespondError(w, http.StatusNotFound, "misión no encontrada")
+	if err := s.Missions.Borrar(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
 	RespondJSON(w, http.StatusNoContent, nil)
 }
 
 // ListarUsermissions atiende GET /api/v1/usermissions.
 func (s *Server) ListarUsermissions(w http.ResponseWriter, _ *http.Request) {
-	usermissions := s.Storage.ListarUsermissions()
-	RespondJSON(w, http.StatusOK, usermissions)
+	RespondJSON(w, http.StatusOK, s.UserMissions.Listar())
 }
 
 // ObtenerUserMission atiende GET /api/v1/usermissions/{id}.
 func (s *Server) ObtenerUserMission(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		RespondError(w, http.StatusBadRequest, "id debe ser un numero entero")
 		return
 	}
-
-	usermission, encontrado := s.Storage.BuscarUserMissionPorID(id)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "misión no encontrada")
+	usermission, err := s.UserMissions.Obtener(id)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
 	RespondJSON(w, http.StatusOK, usermission)
 }
 
 // CrearUserMission atiende POST /api/v1/usermissions.
 func (s *Server) CrearUserMission(w http.ResponseWriter, r *http.Request) {
 	var nuevo models.UserMission
-
 	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
-		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		RespondError(w, http.StatusBadRequest, "JSON invalido: "+err.Error())
 		return
 	}
-
-	if nuevo.UserID <= 0 {
-		RespondError(w, http.StatusBadRequest, "user_id es obligatorio")
+	creado, err := s.UserMissions.Crear(nuevo)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
-	if nuevo.MissionID <= 0 {
-		RespondError(w, http.StatusBadRequest, "mission_id es obligatorio")
-		return
-	}
-
-	creado := s.Storage.CrearUserMission(nuevo)
 	RespondJSON(w, http.StatusCreated, creado)
 }
 
@@ -277,31 +187,19 @@ func (s *Server) CrearUserMission(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ActualizarUserMission(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		RespondError(w, http.StatusBadRequest, "id debe ser un numero entero")
 		return
 	}
-
 	var datos models.UserMission
 	if err := json.NewDecoder(r.Body).Decode(&datos); err != nil {
-		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
+		RespondError(w, http.StatusBadRequest, "JSON invalido: "+err.Error())
 		return
 	}
-	if datos.UserID <= 0 {
-		RespondError(w, http.StatusBadRequest, "user_id es obligatorio")
+	actualizado, err := s.UserMissions.Actualizar(id, datos)
+	if err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
-	if datos.MissionID <= 0 {
-		RespondError(w, http.StatusBadRequest, "mission_id es obligatorio")
-		return
-	}
-
-	actualizado, encontrado := s.Storage.ActualizarUserMission(id, datos)
-	if !encontrado {
-		RespondError(w, http.StatusNotFound, "mensaje no encontrado")
-		return
-	}
-
 	RespondJSON(w, http.StatusOK, actualizado)
 }
 
@@ -309,14 +207,12 @@ func (s *Server) ActualizarUserMission(w http.ResponseWriter, r *http.Request) {
 func (s *Server) BorrarUserMission(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
+		RespondError(w, http.StatusBadRequest, "id debe ser un numero entero")
 		return
 	}
-
-	if !s.Storage.BorrarUserMission(id) {
-		RespondError(w, http.StatusNotFound, "usermisión no encontrada")
+	if err := s.UserMissions.Borrar(id); err != nil {
+		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
-
 	RespondJSON(w, http.StatusNoContent, nil)
 }

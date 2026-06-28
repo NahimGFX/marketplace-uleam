@@ -42,6 +42,58 @@ func (q *Queries) ActualizarBadge(ctx context.Context, arg ActualizarBadgeParams
 	return i, err
 }
 
+const actualizarCategoria = `-- name: ActualizarCategoria :one
+UPDATE categorias
+SET nombre = ?
+WHERE id = ?
+RETURNING id, nombre
+`
+
+type ActualizarCategoriaParams struct {
+	Nombre string
+	ID     int64
+}
+
+func (q *Queries) ActualizarCategoria(ctx context.Context, arg ActualizarCategoriaParams) (Categoria, error) {
+	row := q.db.QueryRowContext(ctx, actualizarCategoria, arg.Nombre, arg.ID)
+	var i Categoria
+	err := row.Scan(&i.ID, &i.Nombre)
+	return i, err
+}
+
+const actualizarMensaje = `-- name: ActualizarMensaje :one
+UPDATE mensajes
+SET sender_id = ?,
+    receiver_id = ?,
+    content = ?
+WHERE id = ?
+RETURNING id, sender_id, receiver_id, content
+`
+
+type ActualizarMensajeParams struct {
+	SenderID   int64
+	ReceiverID int64
+	Content    string
+	ID         int64
+}
+
+func (q *Queries) ActualizarMensaje(ctx context.Context, arg ActualizarMensajeParams) (Mensaje, error) {
+	row := q.db.QueryRowContext(ctx, actualizarMensaje,
+		arg.SenderID,
+		arg.ReceiverID,
+		arg.Content,
+		arg.ID,
+	)
+	var i Mensaje
+	err := row.Scan(
+		&i.ID,
+		&i.SenderID,
+		&i.ReceiverID,
+		&i.Content,
+	)
+	return i, err
+}
+
 const actualizarMision = `-- name: ActualizarMision :one
 UPDATE misiones
 SET title = ?,
@@ -273,6 +325,32 @@ func (q *Queries) BorrarBadge(ctx context.Context, id int64) (int64, error) {
 	return result.RowsAffected()
 }
 
+const borrarCategoria = `-- name: BorrarCategoria :execrows
+DELETE FROM categorias
+WHERE id = ?
+`
+
+func (q *Queries) BorrarCategoria(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarCategoria, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const borrarMensaje = `-- name: BorrarMensaje :execrows
+DELETE FROM mensajes
+WHERE id = ?
+`
+
+func (q *Queries) BorrarMensaje(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarMensaje, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const borrarMision = `-- name: BorrarMision :execrows
 DELETE FROM misiones
 WHERE id = ?
@@ -365,6 +443,35 @@ func (q *Queries) BuscarBadgePorID(ctx context.Context, id int64) (Badge, error)
 		&i.Nombre,
 		&i.Descripcion,
 		&i.RequiredRep,
+	)
+	return i, err
+}
+
+const buscarCategoriaPorID = `-- name: BuscarCategoriaPorID :one
+SELECT id, nombre FROM categorias WHERE id = ?
+`
+
+func (q *Queries) BuscarCategoriaPorID(ctx context.Context, id int64) (Categoria, error) {
+	row := q.db.QueryRowContext(ctx, buscarCategoriaPorID, id)
+	var i Categoria
+	err := row.Scan(&i.ID, &i.Nombre)
+	return i, err
+}
+
+const buscarMensajePorID = `-- name: BuscarMensajePorID :one
+SELECT id, sender_id, receiver_id, content
+FROM mensajes
+WHERE id = ?
+`
+
+func (q *Queries) BuscarMensajePorID(ctx context.Context, id int64) (Mensaje, error) {
+	row := q.db.QueryRowContext(ctx, buscarMensajePorID, id)
+	var i Mensaje
+	err := row.Scan(
+		&i.ID,
+		&i.SenderID,
+		&i.ReceiverID,
+		&i.Content,
 	)
 	return i, err
 }
@@ -502,6 +609,43 @@ func (q *Queries) CrearBadge(ctx context.Context, arg CrearBadgeParams) (Badge, 
 		&i.Nombre,
 		&i.Descripcion,
 		&i.RequiredRep,
+	)
+	return i, err
+}
+
+const crearCategoria = `-- name: CrearCategoria :one
+INSERT INTO categorias (nombre)
+VALUES (?)
+RETURNING id, nombre
+`
+
+func (q *Queries) CrearCategoria(ctx context.Context, nombre string) (Categoria, error) {
+	row := q.db.QueryRowContext(ctx, crearCategoria, nombre)
+	var i Categoria
+	err := row.Scan(&i.ID, &i.Nombre)
+	return i, err
+}
+
+const crearMensaje = `-- name: CrearMensaje :one
+INSERT INTO mensajes (sender_id, receiver_id, content)
+VALUES (?, ?, ?)
+RETURNING id, sender_id, receiver_id, content
+`
+
+type CrearMensajeParams struct {
+	SenderID   int64
+	ReceiverID int64
+	Content    string
+}
+
+func (q *Queries) CrearMensaje(ctx context.Context, arg CrearMensajeParams) (Mensaje, error) {
+	row := q.db.QueryRowContext(ctx, crearMensaje, arg.SenderID, arg.ReceiverID, arg.Content)
+	var i Mensaje
+	err := row.Scan(
+		&i.ID,
+		&i.SenderID,
+		&i.ReceiverID,
+		&i.Content,
 	)
 	return i, err
 }
@@ -718,6 +862,74 @@ func (q *Queries) ListarBadges(ctx context.Context) ([]Badge, error) {
 	return items, nil
 }
 
+const listarCategorias = `-- name: ListarCategorias :many
+SELECT id, nombre FROM categorias
+`
+
+// Modulo 2
+// ==========================================
+// categorias
+// ==========================================
+func (q *Queries) ListarCategorias(ctx context.Context) ([]Categoria, error) {
+	rows, err := q.db.QueryContext(ctx, listarCategorias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Categoria
+	for rows.Next() {
+		var i Categoria
+		if err := rows.Scan(&i.ID, &i.Nombre); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listarMensajes = `-- name: ListarMensajes :many
+
+SELECT id, sender_id, receiver_id, content
+FROM mensajes
+`
+
+// ==========================================
+// MENSAJES
+// ==========================================
+func (q *Queries) ListarMensajes(ctx context.Context) ([]Mensaje, error) {
+	rows, err := q.db.QueryContext(ctx, listarMensajes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Mensaje
+	for rows.Next() {
+		var i Mensaje
+		if err := rows.Scan(
+			&i.ID,
+			&i.SenderID,
+			&i.ReceiverID,
+			&i.Content,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listarMissions = `-- name: ListarMissions :many
 
 
@@ -802,7 +1014,6 @@ SELECT id, nombre, descripcion, precio, categoria_id
 FROM productos
 `
 
-// Modulo 2
 // ==========================================
 // PRODUCTOS
 // ==========================================

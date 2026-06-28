@@ -180,7 +180,7 @@ func (m *Memoria) SeedUsermissions() {
 	}
 	m.nextUserMissionID = 8
 }
-func (m *Memoria) ListarUsermissions() []models.UserMission {
+func (m *Memoria) ListarUserMissions() []models.UserMission {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
