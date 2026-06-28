@@ -37,23 +37,6 @@ func aUser(u sqlcdb.Usuario) models.User {
 	}
 }
 
-func aCategoria(c sqlcdb.Categoria) models.Categoria {
-	return models.Categoria{
-		ID:   int(c.ID),
-		Name: c.Nombre,
-	}
-}
-
-func aProducto(p sqlcdb.Producto) models.Producto {
-	return models.Producto{
-		ID:          int(p.ID),
-		Nombre:      p.Nombre,
-		Descripcion: p.Descripcion,
-		Precio:      p.Precio,
-		CategoriaID: uint(p.CategoriaID),
-	}
-}
-
 func aReview(r sqlcdb.Review) models.Review {
 	return models.Review{
 		ID:         int(r.ID),
@@ -70,6 +53,23 @@ func aBadge(b sqlcdb.Badge) models.Badge {
 		Name:        b.Nombre,
 		Description: b.Descripcion,
 		RequiredRep: int(b.RequiredRep),
+	}
+}
+
+func aCategoria(c sqlcdb.Categoria) models.Categoria {
+	return models.Categoria{
+		ID:   int(c.ID),
+		Name: c.Nombre,
+	}
+}
+
+func aProducto(p sqlcdb.Producto) models.Producto {
+	return models.Producto{
+		ID:          int(p.ID),
+		Nombre:      p.Nombre,
+		Descripcion: p.Descripcion,
+		Precio:      p.Precio,
+		CategoriaID: uint(p.CategoriaID),
 	}
 }
 
@@ -166,111 +166,6 @@ func (a *AlmacenSQLC) ActualizarUser(id int, u models.User) (models.User, bool) 
 
 func (a *AlmacenSQLC) BorrarUser(id int) bool {
 	n, err := a.q.BorrarUser(context.Background(), int64(id))
-	return err == nil && n > 0
-}
-
-// =====================================
-// CATEGORIAS
-// =====================================
-func (a *AlmacenSQLC) ListarCategorias() []models.Categoria {
-	rows, err := a.q.ListarCategorias(context.Background())
-	if err != nil {
-		return nil
-	}
-
-	out := make([]models.Categoria, 0, len(rows))
-	for _, r := range rows {
-		out = append(out, aCategoria(r))
-	}
-	return out
-}
-
-func (a *AlmacenSQLC) BuscarCategoriaPorID(id int) (models.Categoria, bool) {
-	c, err := a.q.BuscarCategoriaPorID(context.Background(), int64(id))
-	if err != nil {
-		return models.Categoria{}, false
-	}
-	return aCategoria(c), true
-}
-
-func (a *AlmacenSQLC) CrearCategoria(c models.Categoria) models.Categoria {
-	r, err := a.q.CrearCategoria(context.Background(), c.Name)
-	if err != nil {
-		return models.Categoria{}
-	}
-	return aCategoria(r)
-}
-
-func (a *AlmacenSQLC) ActualizarCategoria(id int, c models.Categoria) (models.Categoria, bool) {
-	r, err := a.q.ActualizarCategoria(context.Background(), sqlcdb.ActualizarCategoriaParams{
-		Nombre: c.Name,
-		ID:     int64(id),
-	})
-	if err != nil {
-		return models.Categoria{}, false
-	}
-	return aCategoria(r), true
-}
-
-func (a *AlmacenSQLC) BorrarCategoria(id int) bool {
-	n, err := a.q.BorrarCategoria(context.Background(), int64(id))
-	return err == nil && n > 0
-}
-
-// =====================================
-// PRODUCTOS
-// =====================================
-
-func (a *AlmacenSQLC) ListarProductos() []models.Producto {
-	rows, err := a.q.ListarProductos(context.Background())
-	if err != nil {
-		return nil
-	}
-
-	out := make([]models.Producto, 0, len(rows))
-	for _, r := range rows {
-		out = append(out, aProducto(r))
-	}
-	return out
-}
-
-func (a *AlmacenSQLC) BuscarProductoPorID(id int) (models.Producto, bool) {
-	r, err := a.q.BuscarProductoPorID(context.Background(), int64(id))
-	if err != nil {
-		return models.Producto{}, false
-	}
-	return aProducto(r), true
-}
-
-func (a *AlmacenSQLC) CrearProducto(p models.Producto) models.Producto {
-	r, err := a.q.CrearProducto(context.Background(), sqlcdb.CrearProductoParams{
-		Nombre:      p.Nombre,
-		Descripcion: p.Descripcion,
-		Precio:      p.Precio,
-		CategoriaID: int64(p.CategoriaID),
-	})
-	if err != nil {
-		return models.Producto{}
-	}
-	return aProducto(r)
-}
-
-func (a *AlmacenSQLC) ActualizarProducto(id int, p models.Producto) (models.Producto, bool) {
-	r, err := a.q.ActualizarProducto(context.Background(), sqlcdb.ActualizarProductoParams{
-		Nombre:      p.Nombre,
-		Descripcion: p.Descripcion,
-		Precio:      p.Precio,
-		CategoriaID: int64(p.CategoriaID),
-		ID:          int64(id),
-	})
-	if err != nil {
-		return models.Producto{}, false
-	}
-	return aProducto(r), true
-}
-
-func (a *AlmacenSQLC) BorrarProducto(id int) bool {
-	n, err := a.q.BorrarProducto(context.Background(), int64(id))
 	return err == nil && n > 0
 }
 
@@ -383,6 +278,111 @@ func (a *AlmacenSQLC) ActualizarBadge(id int, b models.Badge) (models.Badge, boo
 
 func (a *AlmacenSQLC) BorrarBadge(id int) bool {
 	n, err := a.q.BorrarBadge(context.Background(), int64(id))
+	return err == nil && n > 0
+}
+
+// =====================================
+// CATEGORIAS
+// =====================================
+func (a *AlmacenSQLC) ListarCategorias() []models.Categoria {
+	rows, err := a.q.ListarCategorias(context.Background())
+	if err != nil {
+		return nil
+	}
+
+	out := make([]models.Categoria, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, aCategoria(r))
+	}
+	return out
+}
+
+func (a *AlmacenSQLC) BuscarCategoriaPorID(id int) (models.Categoria, bool) {
+	c, err := a.q.BuscarCategoriaPorID(context.Background(), int64(id))
+	if err != nil {
+		return models.Categoria{}, false
+	}
+	return aCategoria(c), true
+}
+
+func (a *AlmacenSQLC) CrearCategoria(c models.Categoria) models.Categoria {
+	r, err := a.q.CrearCategoria(context.Background(), c.Name)
+	if err != nil {
+		return models.Categoria{}
+	}
+	return aCategoria(r)
+}
+
+func (a *AlmacenSQLC) ActualizarCategoria(id int, c models.Categoria) (models.Categoria, bool) {
+	r, err := a.q.ActualizarCategoria(context.Background(), sqlcdb.ActualizarCategoriaParams{
+		Nombre: c.Name,
+		ID:     int64(id),
+	})
+	if err != nil {
+		return models.Categoria{}, false
+	}
+	return aCategoria(r), true
+}
+
+func (a *AlmacenSQLC) BorrarCategoria(id int) bool {
+	n, err := a.q.BorrarCategoria(context.Background(), int64(id))
+	return err == nil && n > 0
+}
+
+// =====================================
+// PRODUCTOS
+// =====================================
+
+func (a *AlmacenSQLC) ListarProductos() []models.Producto {
+	rows, err := a.q.ListarProductos(context.Background())
+	if err != nil {
+		return nil
+	}
+
+	out := make([]models.Producto, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, aProducto(r))
+	}
+	return out
+}
+
+func (a *AlmacenSQLC) BuscarProductoPorID(id int) (models.Producto, bool) {
+	r, err := a.q.BuscarProductoPorID(context.Background(), int64(id))
+	if err != nil {
+		return models.Producto{}, false
+	}
+	return aProducto(r), true
+}
+
+func (a *AlmacenSQLC) CrearProducto(p models.Producto) models.Producto {
+	r, err := a.q.CrearProducto(context.Background(), sqlcdb.CrearProductoParams{
+		Nombre:      p.Nombre,
+		Descripcion: p.Descripcion,
+		Precio:      p.Precio,
+		CategoriaID: int64(p.CategoriaID),
+	})
+	if err != nil {
+		return models.Producto{}
+	}
+	return aProducto(r)
+}
+
+func (a *AlmacenSQLC) ActualizarProducto(id int, p models.Producto) (models.Producto, bool) {
+	r, err := a.q.ActualizarProducto(context.Background(), sqlcdb.ActualizarProductoParams{
+		Nombre:      p.Nombre,
+		Descripcion: p.Descripcion,
+		Precio:      p.Precio,
+		CategoriaID: int64(p.CategoriaID),
+		ID:          int64(id),
+	})
+	if err != nil {
+		return models.Producto{}, false
+	}
+	return aProducto(r), true
+}
+
+func (a *AlmacenSQLC) BorrarProducto(id int) bool {
+	n, err := a.q.BorrarProducto(context.Background(), int64(id))
 	return err == nil && n > 0
 }
 

@@ -20,4 +20,8 @@ var (
 	ErrContentVacio          = errors.New("el campo contenido es obligatorio")
 	ErrUserIDRequerido       = errors.New("el campo userID es obligatorio")
 	ErrMissionIDRequerido    = errors.New("el campo missionID es obligatorio")
+	ErrEmailVacio            = errors.New("el email es obligatorio")
+	ErrPasswordVacia         = errors.New("la contraseña es obligatoria")
+	ErrReviewerIDRequerido   = errors.New("el reviewer_id es obligatorio")
+	ErrReviewedIDRequerido   = errors.New("el reviewed_id es obligatorio")
 )

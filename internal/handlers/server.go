@@ -9,6 +9,11 @@ import "marketplace-api/internal/service"
 // que es la que tiene la logica de negocio. Los handlers quedan delgados:
 // decodifican el request, llaman al servicio y traducen el resultado a HTTP.
 type Server struct {
+	//MODULO 1
+	Users   *service.UserService
+	Reviews *service.ReviewService
+	Badges  *service.BadgeService
+	//MODULO 3
 	Messages     *service.MessageService
 	Missions     *service.MissionService
 	UserMissions *service.UserMissionService

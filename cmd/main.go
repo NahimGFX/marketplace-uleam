@@ -22,8 +22,9 @@ import (
 
 func main() {
 
-	// 1. GORM es el DUENO DEL ESQUEMA: abre la DB, migra y siembra.
-	//    Ahora tambien migra la tabla de usuarios.
+	// =========================
+	// GORM (usuarios + migraciones)
+	// =========================
 	gdb, err := gorm.Open(sqlite.Open("marketplace.db"), &gorm.Config{})
 	if err != nil {
 		log.Fatal("no se pudo abrir la base de datos: ", err)
@@ -41,7 +42,9 @@ func main() {
 	almacenGorm := storage.NuevoAlmacenSQLite(gdb)
 	almacenGorm.SembrarSiVacio()
 
-	// 2. Elegir el backend de productos/categorias segun STORAGE (igual que antes).
+	// =========================
+	// BACKEND DINÁMICO (GORM o SQLC)
+	// =========================
 	var almacen storage.Almacen
 
 	switch os.Getenv("STORAGE") {
@@ -60,34 +63,42 @@ func main() {
 		log.Println("Backend productos/categorías: GORM")
 	}
 
-	// 3. Los usuarios viven SIEMPRE en GORM (decision de la semana). Por eso NO
-	//    cerramos gdb aunque el backend de productos sea sqlc: GORM mantiene su
-	//    conexion para la tabla de usuarios.
+	// =========================
+	// REPOSITORIO DE USUARIOS (SIEMPRE GORM)
+	// =========================
 	usuarioRepo := storage.NuevoUsuarioGORM(gdb)
 
-	// 4. Capa de servicio. Cada servicio recibe SOLO la interfaz estrecha que
-	//    necesita; almacen (Almacen) cumple ProductoRepository y CategoriaRepository
-	//    por embedding, asi que es asignable a ambos parametros.
-	message := service.NuevoMessageService(almacen)
-	missions := service.NuevoMissionService(almacen)
-	userMissions := service.NuevoUserMissionService(almacen)
-	auth := service.NuevoAuthService(usuarioRepo)
-	// 5. Server con los servicios inyectados.
-	servidor := handlers.NewServer(message, missions, userMissions, auth)
+	// =========================
+	// SERVICIOS
+	// =========================
+	messageService := service.NuevoMessageService(almacen)
+	missionService := service.NuevoMissionService(almacen)
+	userMissionService := service.NuevoUserMissionService(almacen)
+	authService := service.NuevoAuthService(usuarioRepo)
 
+	// =========================
+	// SERVER
+	// =========================
+	servidor := handlers.NewServer(
+		messageService,
+		missionService,
+		userMissionService,
+		authService,
+	)
+
+	// =========================
+	// ROUTER
+	// =========================
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
 	r.Use(chimw.Recoverer)
 	r.Use(middleware.CORS)
 
 	r.Route("/api/v1", func(r chi.Router) {
-
-		routes.PerfiñRoutes(r, servidor)
+		routes.PerfilRoutes(r, servidor)
 		routes.MarketplaceRoutes(r, servidor)
-
-		// 🔐 ahora sí pasas authSvc
 		routes.AuthRoutes(r, servidor)
-		routes.ComunidadRoutes(r, servidor, auth)
+		routes.ComunidadRoutes(r, servidor, authService)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
