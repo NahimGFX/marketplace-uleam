@@ -447,7 +447,7 @@ func (a *AlmacenSQLC) BorrarMision(id int) bool {
 // USER MISSIONS
 // =====================================
 
-func (a *AlmacenSQLC) ListarUsermissions() []models.UserMission {
+func (a *AlmacenSQLC) ListarUserMissions() []models.UserMission {
 	rows, err := a.q.ListarUserMissions(context.Background())
 	if err != nil {
 		return nil

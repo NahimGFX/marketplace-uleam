@@ -11,13 +11,13 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// ListarCategorias atiende GET /api/v1/categorias.
+// // ListarCategorias atiende GET /api/v1/categorias.
 func (s *Server) ListarCategorias(w http.ResponseWriter, _ *http.Request) {
 	categorias := s.Storage.ListarCategorias()
 	RespondJSON(w, http.StatusOK, categorias)
 }
 
-// ObtenerCategoria atiende GET /api/v1/categorias/{id}.
+// // ObtenerCategoria atiende GET /api/v1/categorias/{id}.
 func (s *Server) ObtenerCategoria(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -34,7 +34,7 @@ func (s *Server) ObtenerCategoria(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, categoria)
 }
 
-// CrearCategoria atiende POST /api/v1/categorias.
+// // CrearCategoria atiende POST /api/v1/categorias.
 func (s *Server) CrearCategoria(w http.ResponseWriter, r *http.Request) {
 	var nueva models.Categoria
 	if err := json.NewDecoder(r.Body).Decode(&nueva); err != nil {
@@ -50,7 +50,7 @@ func (s *Server) CrearCategoria(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusCreated, creada)
 }
 
-// ActualizarCategoria atiende PUT /api/v1/categorias/{id}.
+// // ActualizarCategoria atiende PUT /api/v1/categorias/{id}.
 func (s *Server) ActualizarCategoria(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -77,7 +77,7 @@ func (s *Server) ActualizarCategoria(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, actualizada)
 }
 
-// BorrarCategoria atiende DELETE /api/v1/categorias/{id}.
+// // BorrarCategoria atiende DELETE /api/v1/categorias/{id}.
 func (s *Server) BorrarCategoria(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {

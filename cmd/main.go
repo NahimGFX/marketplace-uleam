@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	_ "github.com/glebarez/go-sqlite"
-	"github.com/glebarez/sqlite"
+	_ "github.com/glebarez/go-sqlite" // driver sqlc
+	"github.com/glebarez/sqlite"      // driver gorm
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"gorm.io/gorm"
@@ -28,6 +28,7 @@ func main() {
 	if err != nil {
 		log.Fatal("no se pudo abrir la base de datos: ", err)
 	}
+
 	if err := gdb.AutoMigrate(
 		&models.Message{},
 		&models.Mission{},
@@ -36,29 +37,37 @@ func main() {
 	); err != nil {
 		log.Fatal("fallo AutoMigrate: ", err)
 	}
-	almacenGorm := storage.NuevoAlmacenSQLC(gdb)
+
+	almacenGorm := storage.NuevoAlmacenSQLite(gdb)
 	almacenGorm.SembrarSiVacio()
+
+	// 2. Elegir el backend de productos/categorias segun STORAGE (igual que antes).
 	var almacen storage.Almacen
+
 	switch os.Getenv("STORAGE") {
+
 	case "sqlc":
-		sdb, err := sql.Open("sqlite", "cafeteria.db")
+		sdb, err := sql.Open("sqlite", "marketplace.db")
 		if err != nil {
 			log.Fatal("no se pudo abrir sql.DB para sqlc: ", err)
 		}
+
 		almacen = storage.NuevoAlmacenSQLC(sdb)
-		log.Println("Backend de productos/categorias: sqlc (database/sql)")
+		log.Println("Backend productos/categorías: SQLC")
+
 	default:
 		almacen = almacenGorm
-		log.Println("Backend de productos/categorias: GORM")
+		log.Println("Backend productos/categorías: GORM")
 	}
+
 	// 3. Los usuarios viven SIEMPRE en GORM (decision de la semana). Por eso NO
 	//    cerramos gdb aunque el backend de productos sea sqlc: GORM mantiene su
 	//    conexion para la tabla de usuarios.
 	usuarioRepo := storage.NuevoUsuarioGORM(gdb)
+
 	// 4. Capa de servicio. Cada servicio recibe SOLO la interfaz estrecha que
 	//    necesita; almacen (Almacen) cumple ProductoRepository y CategoriaRepository
 	//    por embedding, asi que es asignable a ambos parametros.
-	almacen := storage.NuevoSQLite(gdb)
 	message := service.NuevoMessageService(almacen)
 	missions := service.NuevoMissionService(almacen)
 	userMissions := service.NuevoUserMissionService(almacen)
@@ -75,8 +84,10 @@ func main() {
 
 		routes.PerfiñRoutes(r, servidor)
 		routes.MarketplaceRoutes(r, servidor)
-		routes.ComunidadRoutes(r, servidor)
 
+		// 🔐 ahora sí pasas authSvc
+		routes.AuthRoutes(r, servidor)
+		routes.ComunidadRoutes(r, servidor, auth)
 	})
 
 	log.Println("Servidor escuchando en http://localhost:8080")
