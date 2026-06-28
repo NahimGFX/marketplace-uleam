@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	_ "github.com/glebarez/go-sqlite" // driver sqlc
-	"github.com/glebarez/sqlite"      // driver gorm
+	_ "github.com/glebarez/go-sqlite"
+	"github.com/glebarez/sqlite"
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"gorm.io/gorm"
