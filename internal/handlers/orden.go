@@ -11,13 +11,13 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// // ListarOrdenes atiende GET /api/v1/ordenes.
+// // // ListarOrdenes atiende GET /api/v1/ordenes.
 func (s *Server) ListarOrdenes(w http.ResponseWriter, _ *http.Request) {
 	ordenes := s.Storage.ListarOrdenes()
 	RespondJSON(w, http.StatusOK, ordenes)
 }
 
-// // ObtenerOrden atiende GET /api/v1/ordenes/{id}.
+// // // ObtenerOrden atiende GET /api/v1/ordenes/{id}.
 func (s *Server) ObtenerOrden(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -32,7 +32,7 @@ func (s *Server) ObtenerOrden(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, orden)
 }
 
-// // CrearOrden atiende POST /api/v1/ordenes.
+// // // CrearOrden atiende POST /api/v1/ordenes.
 func (s *Server) CrearOrden(w http.ResponseWriter, r *http.Request) {
 	var nueva models.Orden
 	if err := json.NewDecoder(r.Body).Decode(&nueva); err != nil {
@@ -55,7 +55,7 @@ func (s *Server) CrearOrden(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusCreated, creada)
 }
 
-// // ActualizarOrden atiende PUT /api/v1/ordenes/{id}.
+// // // ActualizarOrden atiende PUT /api/v1/ordenes/{id}.
 func (s *Server) ActualizarOrden(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -91,7 +91,7 @@ func (s *Server) ActualizarOrden(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// // BorrarOrden atiende DELETE /api/v1/ordenes/{id}.
+// // // BorrarOrden atiende DELETE /api/v1/ordenes/{id}.
 func (s *Server) BorrarOrden(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {

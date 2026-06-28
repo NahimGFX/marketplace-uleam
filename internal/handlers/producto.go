@@ -11,13 +11,13 @@ import (
 	"marketplace-api/internal/models"
 )
 
-// // ListarProductos atiende GET /api/v1/productos.
+// // // ListarProductos atiende GET /api/v1/productos.
 func (s *Server) ListarProductos(w http.ResponseWriter, _ *http.Request) {
 	productos := s.Storage.ListarProductos()
 	RespondJSON(w, http.StatusOK, productos)
 }
 
-// // ObtenerProducto atiende GET /api/v1/productos/{id}.
+// // // ObtenerProducto atiende GET /api/v1/productos/{id}.
 func (s *Server) ObtenerProducto(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -34,7 +34,7 @@ func (s *Server) ObtenerProducto(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, producto)
 }
 
-// // CrearProducto atiende POST /api/v1/productos.
+// // // CrearProducto atiende POST /api/v1/productos.
 func (s *Server) CrearProducto(w http.ResponseWriter, r *http.Request) {
 	var nuevo models.Producto
 	if err := json.NewDecoder(r.Body).Decode(&nuevo); err != nil {
@@ -58,7 +58,7 @@ func (s *Server) CrearProducto(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusCreated, creado)
 }
 
-// // ActualizarProducto atiende PUT /api/v1/productos/{id}.
+// // // ActualizarProducto atiende PUT /api/v1/productos/{id}.
 func (s *Server) ActualizarProducto(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -97,7 +97,7 @@ func (s *Server) ActualizarProducto(w http.ResponseWriter, r *http.Request) {
 	RespondJSON(w, http.StatusOK, actualizado)
 }
 
-// // BorrarProducto atiende DELETE /api/v1/productos/{id}.
+// // // BorrarProducto atiende DELETE /api/v1/productos/{id}.
 func (s *Server) BorrarProducto(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
