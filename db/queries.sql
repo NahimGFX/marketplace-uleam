@@ -96,6 +96,18 @@ WHERE id = ?;
 
 --Modulo 2
 -- ==========================================
+<<<<<<< HEAD
+-- CATEGORIAS
+-- ==========================================
+-- name: ListarCategorias :many
+SELECT id, nombre
+FROM categorias;
+
+-- name: BuscarCategoriaPorID :one
+SELECT id, nombre
+FROM categorias
+WHERE id = ?;
+=======
 -- categorias
 -- ==========================================
 -- name: ListarCategorias :many
@@ -103,6 +115,7 @@ SELECT id, nombre FROM categorias;
 
 -- name: BuscarCategoriaPorID :one
 SELECT id, nombre FROM categorias WHERE id = ?;
+>>>>>>> 7ecd205d0e1c02c231afc32a55b67ed263352455
 
 -- name: CrearCategoria :one
 INSERT INTO categorias (nombre)
@@ -148,7 +161,6 @@ RETURNING id, nombre, descripcion, precio, categoria_id;
 -- name: BorrarProducto :execrows
 DELETE FROM productos
 WHERE id = ?;
-
 
 -- ==========================================
 -- ORDENES

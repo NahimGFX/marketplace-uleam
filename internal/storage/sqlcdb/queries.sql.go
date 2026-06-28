@@ -863,6 +863,8 @@ func (q *Queries) ListarBadges(ctx context.Context) ([]Badge, error) {
 }
 
 const listarCategorias = `-- name: ListarCategorias :many
+SELECT id, nombre
+FROM categorias
 SELECT id, nombre FROM categorias
 `
 

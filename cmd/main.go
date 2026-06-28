@@ -34,6 +34,9 @@ func main() {
 		&models.Mission{},
 		&models.UserMission{},
 		&models.Usuario{},
+		&models.Categoria{},
+		&models.Producto{},
+		&models.Orden{},
 	); err != nil {
 		log.Fatal("fallo AutoMigrate: ", err)
 	}
@@ -72,8 +75,11 @@ func main() {
 	missions := service.NuevoMissionService(almacen)
 	userMissions := service.NuevoUserMissionService(almacen)
 	auth := service.NuevoAuthService(usuarioRepo)
+	categorias := service.NewCategoriaService(almacen)
+	productos := service.NewPorductoService(almacen)
+	ordenes := service.NewOrdenService(almacen)
 	// 5. Server con los servicios inyectados.
-	servidor := handlers.NewServer(message, missions, userMissions, auth)
+	servidor := handlers.NewServer(message, missions, userMissions, auth, categorias, productos, ordenes)
 
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
@@ -82,8 +88,8 @@ func main() {
 
 	r.Route("/api/v1", func(r chi.Router) {
 
-		routes.PerfiñRoutes(r, servidor)
-		routes.MarketplaceRoutes(r, servidor)
+		routes.PerfilRoutes(r, servidor)
+		routes.MarketplaceRoutes(r, servidor, auth)
 
 		// 🔐 ahora sí pasas authSvc
 		routes.AuthRoutes(r, servidor)
