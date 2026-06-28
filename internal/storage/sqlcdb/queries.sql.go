@@ -42,6 +42,25 @@ func (q *Queries) ActualizarBadge(ctx context.Context, arg ActualizarBadgeParams
 	return i, err
 }
 
+const actualizarCategoria = `-- name: ActualizarCategoria :one
+UPDATE categorias
+SET nombre = ?
+WHERE id = ?
+RETURNING id, nombre
+`
+
+type ActualizarCategoriaParams struct {
+	Nombre string
+	ID     int64
+}
+
+func (q *Queries) ActualizarCategoria(ctx context.Context, arg ActualizarCategoriaParams) (Categoria, error) {
+	row := q.db.QueryRowContext(ctx, actualizarCategoria, arg.Nombre, arg.ID)
+	var i Categoria
+	err := row.Scan(&i.ID, &i.Nombre)
+	return i, err
+}
+
 const actualizarMensaje = `-- name: ActualizarMensaje :one
 UPDATE mensajes
 SET sender_id = ?,
@@ -306,6 +325,19 @@ func (q *Queries) BorrarBadge(ctx context.Context, id int64) (int64, error) {
 	return result.RowsAffected()
 }
 
+const borrarCategoria = `-- name: BorrarCategoria :execrows
+DELETE FROM categorias
+WHERE id = ?
+`
+
+func (q *Queries) BorrarCategoria(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, borrarCategoria, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const borrarMensaje = `-- name: BorrarMensaje :execrows
 DELETE FROM mensajes
 WHERE id = ?
@@ -412,6 +444,17 @@ func (q *Queries) BuscarBadgePorID(ctx context.Context, id int64) (Badge, error)
 		&i.Descripcion,
 		&i.RequiredRep,
 	)
+	return i, err
+}
+
+const buscarCategoriaPorID = `-- name: BuscarCategoriaPorID :one
+SELECT id, nombre FROM categorias WHERE id = ?
+`
+
+func (q *Queries) BuscarCategoriaPorID(ctx context.Context, id int64) (Categoria, error) {
+	row := q.db.QueryRowContext(ctx, buscarCategoriaPorID, id)
+	var i Categoria
+	err := row.Scan(&i.ID, &i.Nombre)
 	return i, err
 }
 
@@ -567,6 +610,19 @@ func (q *Queries) CrearBadge(ctx context.Context, arg CrearBadgeParams) (Badge, 
 		&i.Descripcion,
 		&i.RequiredRep,
 	)
+	return i, err
+}
+
+const crearCategoria = `-- name: CrearCategoria :one
+INSERT INTO categorias (nombre)
+VALUES (?)
+RETURNING id, nombre
+`
+
+func (q *Queries) CrearCategoria(ctx context.Context, nombre string) (Categoria, error) {
+	row := q.db.QueryRowContext(ctx, crearCategoria, nombre)
+	var i Categoria
+	err := row.Scan(&i.ID, &i.Nombre)
 	return i, err
 }
 
@@ -806,6 +862,37 @@ func (q *Queries) ListarBadges(ctx context.Context) ([]Badge, error) {
 	return items, nil
 }
 
+const listarCategorias = `-- name: ListarCategorias :many
+SELECT id, nombre FROM categorias
+`
+
+// Modulo 2
+// ==========================================
+// categorias
+// ==========================================
+func (q *Queries) ListarCategorias(ctx context.Context) ([]Categoria, error) {
+	rows, err := q.db.QueryContext(ctx, listarCategorias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Categoria
+	for rows.Next() {
+		var i Categoria
+		if err := rows.Scan(&i.ID, &i.Nombre); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listarMensajes = `-- name: ListarMensajes :many
 
 SELECT id, sender_id, receiver_id, content
@@ -927,7 +1014,6 @@ SELECT id, nombre, descripcion, precio, categoria_id
 FROM productos
 `
 
-// Modulo 2
 // ==========================================
 // PRODUCTOS
 // ==========================================

@@ -67,7 +67,7 @@ type ComunidadRepository interface {
 	ActualizarMision(id int, datos models.Mission) (models.Mission, bool)
 	BorrarMision(id int) bool
 	//// UserMissions
-	ListarUsermissions() []models.UserMission
+	ListarUserMissions() []models.UserMission
 	BuscarUserMissionPorID(id int) (models.UserMission, bool)
 	CrearUserMission(userMission models.UserMission) models.UserMission
 	ActualizarUserMission(id int, datos models.UserMission) (models.UserMission, bool)
@@ -78,3 +78,18 @@ type Almacen interface {
 	OrdenRepository
 	ComunidadRepository
 }
+
+// UserRepository es el contrato de persistencia de usuarios.
+//
+// Ojo: CrearUsuario devuelve error (no comma-ok como el resto). El email
+// duplicado es un fallo real que el AuthService debe poder mapear a 409; aqui
+// la convencion comma-ok ya no alcanza. Es justo el punto que conecta con los
+// errores de dominio de S12.
+type UserRepository interface {
+	CrearUsuario(u models.Usuario) (models.Usuario, error)
+	BuscarUsuarioPorEmail(email string) (models.Usuario, bool)
+}
+
+// Chequeo en tiempo de compilación: si Memoria dejara de cumplir Almacen,
+// el proyecto NO compila. Red de seguridad opcional.
+var _ Almacen = (*Memoria)(nil)

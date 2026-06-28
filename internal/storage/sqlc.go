@@ -37,6 +37,13 @@ func aUser(u sqlcdb.Usuario) models.User {
 	}
 }
 
+func aCategoria(c sqlcdb.Categoria) models.Categoria {
+	return models.Categoria{
+		ID:   int(c.ID),
+		Name: c.Nombre,
+	}
+}
+
 func aProducto(p sqlcdb.Producto) models.Producto {
 	return models.Producto{
 		ID:          int(p.ID),
@@ -159,6 +166,54 @@ func (a *AlmacenSQLC) ActualizarUser(id int, u models.User) (models.User, bool) 
 
 func (a *AlmacenSQLC) BorrarUser(id int) bool {
 	n, err := a.q.BorrarUser(context.Background(), int64(id))
+	return err == nil && n > 0
+}
+
+// =====================================
+// CATEGORIAS
+// =====================================
+func (a *AlmacenSQLC) ListarCategorias() []models.Categoria {
+	rows, err := a.q.ListarCategorias(context.Background())
+	if err != nil {
+		return nil
+	}
+
+	out := make([]models.Categoria, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, aCategoria(r))
+	}
+	return out
+}
+
+func (a *AlmacenSQLC) BuscarCategoriaPorID(id int) (models.Categoria, bool) {
+	c, err := a.q.BuscarCategoriaPorID(context.Background(), int64(id))
+	if err != nil {
+		return models.Categoria{}, false
+	}
+	return aCategoria(c), true
+}
+
+func (a *AlmacenSQLC) CrearCategoria(c models.Categoria) models.Categoria {
+	r, err := a.q.CrearCategoria(context.Background(), c.Name)
+	if err != nil {
+		return models.Categoria{}
+	}
+	return aCategoria(r)
+}
+
+func (a *AlmacenSQLC) ActualizarCategoria(id int, c models.Categoria) (models.Categoria, bool) {
+	r, err := a.q.ActualizarCategoria(context.Background(), sqlcdb.ActualizarCategoriaParams{
+		Nombre: c.Name,
+		ID:     int64(id),
+	})
+	if err != nil {
+		return models.Categoria{}, false
+	}
+	return aCategoria(r), true
+}
+
+func (a *AlmacenSQLC) BorrarCategoria(id int) bool {
+	n, err := a.q.BorrarCategoria(context.Background(), int64(id))
 	return err == nil && n > 0
 }
 
@@ -392,7 +447,7 @@ func (a *AlmacenSQLC) BorrarMision(id int) bool {
 // USER MISSIONS
 // =====================================
 
-func (a *AlmacenSQLC) ListarUserMissions() []models.UserMission {
+func (a *AlmacenSQLC) ListarUsermissions() []models.UserMission {
 	rows, err := a.q.ListarUserMissions(context.Background())
 	if err != nil {
 		return nil
@@ -447,7 +502,7 @@ func (a *AlmacenSQLC) BorrarUserMission(id int) bool {
 // MENSAJES
 // =====================================
 
-func (a *AlmacenSQLC) Listarmena() []models.Message {
+func (a *AlmacenSQLC) ListarMessages() []models.Message {
 	rows, err := a.q.ListarMensajes(context.Background())
 	if err != nil {
 		return nil
@@ -460,7 +515,7 @@ func (a *AlmacenSQLC) Listarmena() []models.Message {
 	return out
 }
 
-func (a *AlmacenSQLC) BuscarMensajePorID(id int) (models.Message, bool) {
+func (a *AlmacenSQLC) BuscarMessagePorID(id int) (models.Message, bool) {
 	r, err := a.q.BuscarMensajePorID(context.Background(), int64(id))
 	if err != nil {
 		return models.Message{}, false
@@ -468,7 +523,7 @@ func (a *AlmacenSQLC) BuscarMensajePorID(id int) (models.Message, bool) {
 	return aMensaje(r), true
 }
 
-func (a *AlmacenSQLC) CrearMensaje(m models.Message) models.Message {
+func (a *AlmacenSQLC) CrearMessage(m models.Message) models.Message {
 	r, err := a.q.CrearMensaje(context.Background(), sqlcdb.CrearMensajeParams{
 		SenderID:   int64(m.SenderID),
 		ReceiverID: int64(m.ReceiverID),
@@ -480,7 +535,7 @@ func (a *AlmacenSQLC) CrearMensaje(m models.Message) models.Message {
 	return aMensaje(r)
 }
 
-func (a *AlmacenSQLC) ActualizarMensaje(id int, m models.Message) (models.Message, bool) {
+func (a *AlmacenSQLC) ActualizarMessage(id int, m models.Message) (models.Message, bool) {
 	r, err := a.q.ActualizarMensaje(context.Background(), sqlcdb.ActualizarMensajeParams{
 		SenderID:   int64(m.SenderID),
 		ReceiverID: int64(m.ReceiverID),
@@ -493,7 +548,7 @@ func (a *AlmacenSQLC) ActualizarMensaje(id int, m models.Message) (models.Messag
 	return aMensaje(r), true
 }
 
-func (a *AlmacenSQLC) BorrarMensaje(id int) bool {
+func (a *AlmacenSQLC) BorrarMessage(id int) bool {
 	n, err := a.q.BorrarMensaje(context.Background(), int64(id))
 	return err == nil && n > 0
 }

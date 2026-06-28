@@ -96,6 +96,29 @@ WHERE id = ?;
 
 --Modulo 2
 -- ==========================================
+-- categorias
+-- ==========================================
+-- name: ListarCategorias :many
+SELECT id, nombre FROM categorias;
+
+-- name: BuscarCategoriaPorID :one
+SELECT id, nombre FROM categorias WHERE id = ?;
+
+-- name: CrearCategoria :one
+INSERT INTO categorias (nombre)
+VALUES (?)
+RETURNING id, nombre;
+
+-- name: ActualizarCategoria :one
+UPDATE categorias
+SET nombre = ?
+WHERE id = ?
+RETURNING id, nombre;
+
+-- name: BorrarCategoria :execrows
+DELETE FROM categorias
+WHERE id = ?;
+-- ==========================================
 -- PRODUCTOS
 -- ==========================================
 
