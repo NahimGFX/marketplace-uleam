@@ -160,11 +160,11 @@ func (s *Server) CrearReview(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
 		return
 	}
-	if nuevo.ReviewerID < 0 {
+	if nuevo.ReviewerID == 0 {
 		RespondError(w, http.StatusBadRequest, "el campo reviewer_id es obligatorio")
 		return
 	}
-	if nuevo.ReviewedID < 0 {
+	if nuevo.ReviewedID == 0 {
 		RespondError(w, http.StatusBadRequest, "el campo reviewed_id es obligatorio")
 		return
 	}
@@ -197,11 +197,11 @@ func (s *Server) ActualizarReview(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "JSON inválido: "+err.Error())
 		return
 	}
-	if datos.ReviewerID < 0 {
+	if datos.ReviewerID == 0 {
 		RespondError(w, http.StatusBadRequest, "el campo reviewer_id es obligatorio")
 		return
 	}
-	if datos.ReviewedID < 0 {
+	if datos.ReviewedID == 0 {
 		RespondError(w, http.StatusBadRequest, "el campo reviewed_id es obligatorio")
 		return
 	}
