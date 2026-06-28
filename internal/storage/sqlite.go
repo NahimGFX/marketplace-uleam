@@ -17,6 +17,141 @@ func NuevoAlmacenSQLite(db *gorm.DB) *AlmacenSQLite {
 }
 
 //
+// =========================
+// USERS
+// =========================
+//
+
+func (s *AlmacenSQLite) ListarUsers() []models.User {
+	var users []models.User
+	s.db.Find(&users)
+	return users
+}
+
+func (s *AlmacenSQLite) BuscarUserPorID(id int) (models.User, bool) {
+	var user models.User
+
+	if err := s.db.First(&user, id).Error; err != nil {
+		return models.User{}, false
+	}
+
+	return user, true
+}
+
+func (s *AlmacenSQLite) CrearUser(u models.User) models.User {
+	s.db.Create(&u)
+	return u
+}
+
+func (s *AlmacenSQLite) ActualizarUser(id int, datos models.User) (models.User, bool) {
+	var user models.User
+
+	if err := s.db.First(&user, id).Error; err != nil {
+		return models.User{}, false
+	}
+
+	datos.ID = id
+	s.db.Save(&datos)
+
+	return datos, true
+}
+
+func (s *AlmacenSQLite) BorrarUser(id int) bool {
+	result := s.db.Delete(&models.User{}, id)
+	return result.RowsAffected > 0
+}
+
+//
+// =========================
+// REVIEWS
+// =========================
+//
+
+func (s *AlmacenSQLite) ListarReviews() []models.Review {
+	var reviews []models.Review
+	s.db.Find(&reviews)
+	return reviews
+}
+
+func (s *AlmacenSQLite) BuscarReviewPorID(id int) (models.Review, bool) {
+	var review models.Review
+
+	if err := s.db.First(&review, id).Error; err != nil {
+		return models.Review{}, false
+	}
+
+	return review, true
+}
+
+func (s *AlmacenSQLite) CrearReview(r models.Review) models.Review {
+	s.db.Create(&r)
+	return r
+}
+
+func (s *AlmacenSQLite) ActualizarReview(id int, datos models.Review) (models.Review, bool) {
+	var review models.Review
+
+	if err := s.db.First(&review, id).Error; err != nil {
+		return models.Review{}, false
+	}
+
+	datos.ID = id
+	s.db.Save(&datos)
+
+	return datos, true
+}
+
+func (s *AlmacenSQLite) BorrarReview(id int) bool {
+	result := s.db.Delete(&models.Review{}, id)
+	return result.RowsAffected > 0
+}
+
+//
+// =========================
+// BADGES
+// =========================
+//
+
+func (s *AlmacenSQLite) ListarBadges() []models.Badge {
+	var badges []models.Badge
+	s.db.Find(&badges)
+	return badges
+}
+
+func (s *AlmacenSQLite) BuscarBadgePorID(id int) (models.Badge, bool) {
+	var badge models.Badge
+
+	if err := s.db.First(&badge, id).Error; err != nil {
+		return models.Badge{}, false
+	}
+
+	return badge, true
+}
+
+func (s *AlmacenSQLite) CrearBadge(b models.Badge) models.Badge {
+	s.db.Create(&b)
+	return b
+}
+
+func (s *AlmacenSQLite) ActualizarBadge(id int, datos models.Badge) (models.Badge, bool) {
+	var badge models.Badge
+
+	if err := s.db.First(&badge, id).Error; err != nil {
+		return models.Badge{}, false
+	}
+
+	datos.ID = id
+	s.db.Save(&datos)
+
+	return datos, true
+}
+
+func (s *AlmacenSQLite) BorrarBadge(id int) bool {
+	result := s.db.Delete(&models.Badge{}, id)
+	return result.RowsAffected > 0
+}
+
+//
 // MESSAGES
 //
 
@@ -151,6 +286,54 @@ func (s *AlmacenSQLite) BorrarUserMission(id int) bool {
 
 func (a *AlmacenSQLite) SembrarSiVacio() {
 	var n int64
+
+	// =========================
+	// USERS
+	// =========================
+	if n == 0 {
+		users := []models.User{
+			{ID: 1, Name: "Juan Perez", Email: "juan@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 20},
+			{ID: 2, Name: "Maria Lopez", Email: "maria@uleam.edu.ec", Password: "123456", Level: 2, Reputation: 75},
+			{ID: 3, Name: "Carlos Zambrano", Email: "carlos@uleam.edu.ec", Password: "123456", Level: 3, Reputation: 150},
+			{ID: 4, Name: "Andrea Vera", Email: "andrea@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 30},
+			{ID: 5, Name: "Luis Mendoza", Email: "luis@uleam.edu.ec", Password: "123456", Level: 4, Reputation: 220},
+			{ID: 6, Name: "Sofia Cedeño", Email: "sofia@uleam.edu.ec", Password: "123456", Level: 2, Reputation: 90},
+			{ID: 7, Name: "Kevin Alcivar", Email: "kevin@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 15},
+		}
+		a.db.Create(&users)
+	}
+
+	// =========================
+	// REVIEWS
+	// =========================
+	if n == 0 {
+		reviews := []models.Review{
+			{ID: 1, ReviewerID: 2, ReviewedID: 1, Rating: 5, Comment: "Excelente vendedor, todo fue rapido y seguro"},
+			{ID: 2, ReviewerID: 1, ReviewedID: 3, Rating: 4, Comment: "Buena comunicacion y entrega puntual"},
+			{ID: 3, ReviewerID: 4, ReviewedID: 2, Rating: 5, Comment: "Muy amable y responsable"},
+			{ID: 4, ReviewerID: 5, ReviewedID: 1, Rating: 4, Comment: "El producto estaba en buen estado"},
+			{ID: 5, ReviewerID: 6, ReviewedID: 4, Rating: 5, Comment: "Recomendado para futuras compras"},
+			{ID: 6, ReviewerID: 7, ReviewedID: 5, Rating: 3, Comment: "La entrega demoro un poco pero llego bien"},
+			{ID: 7, ReviewerID: 3, ReviewedID: 6, Rating: 5, Comment: "Excelente experiencia de compra"},
+		}
+		a.db.Create(&reviews)
+	}
+
+	// =========================
+	// BADGES
+	// =========================
+	if n == 0 {
+		badges := []models.Badge{
+			{ID: 1, Name: "Novato", Description: "Alcanza 10 puntos de reputacion", RequiredRep: 10},
+			{ID: 2, Name: "Colaborador", Description: "Alcanza 50 puntos de reputacion", RequiredRep: 50},
+			{ID: 3, Name: "Vendedor Confiable", Description: "Alcanza 100 puntos de reputacion", RequiredRep: 100},
+			{ID: 4, Name: "Comerciante Experto", Description: "Alcanza 200 puntos de reputacion", RequiredRep: 200},
+			{ID: 5, Name: "Tutor Destacado", Description: "Recibe excelentes calificaciones de otros usuarios", RequiredRep: 300},
+			{ID: 6, Name: "Embajador ULEAM", Description: "Mantiene una reputacion sobresaliente en la plataforma", RequiredRep: 500},
+			{ID: 7, Name: "Leyenda ULEAM", Description: "Alcanza el maximo reconocimiento dentro del marketplace", RequiredRep: 1000},
+		}
+		a.db.Create(&badges)
+	}
 
 	// Si ya hay mensajes, asumimos que ya está sembrado
 	a.db.Model(&models.Message{}).Count(&n)

@@ -19,14 +19,14 @@ func PerfilRoutes(r chi.Router, s *handlers.Server) {
 
 	// Reviews
 	r.Get("/reviews", s.ListarReviews)
-	r.Get("/reviews/{id}", s.ObteneReview)
+	r.Get("/reviews/{id}", s.ObtenerReview)
 	r.Post("/reviews", s.CrearReview)
 	r.Put("/reviews/{id}", s.ActualizarReview)
 	r.Delete("/reviews/{id}", s.BorrarReview)
 
 	// Badges
 	r.Get("/badges", s.ListarBadges)
-	r.Get("/badges/{id}", s.ObteneBadge)
+	r.Get("/badges/{id}", s.ObtenerBadge)
 	r.Post("/badges", s.CrearBadge)
 	r.Put("/badges/{id}", s.ActualizarBadge)
 	r.Delete("/badges/{id}", s.BorrarBadge)
