@@ -27,8 +27,8 @@ type PerfilRepository interface {
 	ActualizarBadge(id int, datos models.Badge) (models.Badge, bool)
 	BorrarBadge(id int) bool
 }
-type OrdenRepository interface {
 
+type OrdenRepository interface {
 	// MODULO 2
 	// Categorias
 	ListarCategorias() []models.Categoria
@@ -52,7 +52,6 @@ type OrdenRepository interface {
 	BorrarOrden(id int) bool
 }
 type ComunidadRepository interface {
-
 	// MODULO 3
 	// Messages
 	ListarMessages() []models.Message

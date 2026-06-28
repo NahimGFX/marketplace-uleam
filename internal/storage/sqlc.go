@@ -252,6 +252,88 @@ func (a *AlmacenSQLC) BorrarOrden(id int) bool {
 }
 
 // =====================================
+// ORDENES
+// =====================================
+
+func (a *AlmacenSQLC) ListarOrdenes() []models.Orden {
+	rows, err := a.q.ListarOrdenes(context.Background())
+	if err != nil {
+		return nil
+	}
+	out := make([]models.Orden, 0, len(rows))
+	for _, r := range rows {
+		orden := aOrden(r)
+		if p, ok := a.BuscarProductoPorID(int(r.ProductoID)); ok {
+			orden.Producto = p
+		}
+		if u, ok := a.BuscarUserPorID(int(r.CompradorID)); ok {
+			orden.User = u
+		}
+		out = append(out, orden)
+	}
+	return out
+}
+
+func (a *AlmacenSQLC) BuscarOrdenPorID(id int) (models.Orden, bool) {
+	r, err := a.q.BuscarOrdenPorID(context.Background(), int64(id))
+	if err != nil {
+		return models.Orden{}, false
+	}
+	orden := aOrden(r)
+	if p, ok := a.BuscarProductoPorID(int(r.ProductoID)); ok {
+		orden.Producto = p
+	}
+	if u, ok := a.BuscarUserPorID(int(r.CompradorID)); ok {
+		orden.User = u
+	}
+	return orden, true
+}
+
+func (a *AlmacenSQLC) CrearOrden(o models.Orden) models.Orden {
+	r, err := a.q.CrearOrden(context.Background(), sqlcdb.CrearOrdenParams{
+		ProductoID:  int64(o.ProductoID),
+		CompradorID: int64(o.IDComprador),
+		Estado:      o.Estado,
+	})
+	if err != nil {
+		return models.Orden{}
+	}
+	orden := aOrden(r)
+	if p, ok := a.BuscarProductoPorID(int(r.ProductoID)); ok {
+		orden.Producto = p
+	}
+	if u, ok := a.BuscarUserPorID(int(r.CompradorID)); ok {
+		orden.User = u
+	}
+	return orden
+}
+
+func (a *AlmacenSQLC) ActualizarOrden(id int, o models.Orden) (models.Orden, bool) {
+	r, err := a.q.ActualizarOrden(context.Background(), sqlcdb.ActualizarOrdenParams{
+		ProductoID:  int64(o.ProductoID),
+		CompradorID: int64(o.IDComprador),
+		Estado:      o.Estado,
+		ID:          int64(id),
+	})
+	if err != nil {
+		return models.Orden{}, false
+	}
+	orden := aOrden(r)
+	if p, ok := a.BuscarProductoPorID(int(r.ProductoID)); ok {
+		orden.Producto = p
+	}
+	if u, ok := a.BuscarUserPorID(int(r.CompradorID)); ok {
+		orden.User = u
+	}
+	return orden, true
+}
+
+func (a *AlmacenSQLC) BorrarOrden(id int) bool {
+	n, err := a.q.BorrarOrden(context.Background(), int64(id))
+	return err == nil && n > 0
+}
+
+// =====================================
 // REVIEWS
 // =====================================
 

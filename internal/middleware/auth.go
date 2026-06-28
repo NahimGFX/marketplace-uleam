@@ -2,10 +2,9 @@ package middleware
 
 import (
 	"context"
+	"marketplace-api/internal/service"
 	"net/http"
 	"strings"
-
-	"marketplace-api/internal/service"
 )
 
 // claveContexto es un tipo privado para la clave del context y evitar colisiones.
@@ -26,13 +25,11 @@ func Auth(auth *service.AuthService) func(http.Handler) http.Handler {
 				responderNoAutorizado(w)
 				return
 			}
-
 			usuarioID, err := auth.ValidarToken(partes[1])
 			if err != nil {
 				responderNoAutorizado(w)
 				return
 			}
-
 			ctx := context.WithValue(r.Context(), ClaveUsuarioID, usuarioID)
 			siguiente.ServeHTTP(w, r.WithContext(ctx))
 		})
