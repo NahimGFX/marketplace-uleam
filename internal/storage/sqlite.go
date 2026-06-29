@@ -16,11 +16,9 @@ func NuevoAlmacenSQLite(db *gorm.DB) *AlmacenSQLite {
 	}
 }
 
-//
 // =========================
 // USERS
 // =========================
-//
 
 func (s *AlmacenSQLite) ListarUsers() []models.User {
 	var users []models.User

@@ -21,8 +21,21 @@ type Server struct {
 }
 
 // NewServer construye un Server con sus servicios ya inyectados.
-func NewServer(messages *service.MessageService, missions *service.MissionService, usermissions *service.UserMissionService, auth *service.AuthService) *Server {
+func NewServer(
+	users *service.UserService,
+	reviews *service.ReviewService,
+	badges *service.BadgeService,
+	messages *service.MessageService,
+	missions *service.MissionService,
+	usermissions *service.UserMissionService,
+	auth *service.AuthService,
+) *Server {
+
 	return &Server{
+		Users:   users,
+		Reviews: reviews,
+		Badges:  badges,
+
 		Messages:     messages,
 		Missions:     missions,
 		UserMissions: usermissions,

@@ -128,7 +128,15 @@ func construirEntorno() http.Handler {
 	messageSvc := service.NuevoMessageService(repo)
 	authSvc := service.NuevoAuthService(nil)
 
-	server := handlers.NewServer(messageSvc, nil, nil, authSvc, nil, nil, nil)
+	server := handlers.NewServer(
+		nil,        // UserService
+		nil,        // ReviewService
+		nil,        // BadgeService
+		messageSvc, // MessageService
+		nil,        // MissionService
+		nil,        // UserMissionService
+		authSvc,    // AuthService
+	)
 
 	r := chi.NewRouter()
 
