@@ -13,6 +13,10 @@ type Server struct {
 	Users   *service.UserService
 	Reviews *service.ReviewService
 	Badges  *service.BadgeService
+	// MÓDULO 2
+	Categoria *service.CategoriaService
+	Producto  *service.ProductoService
+	Ordern    *service.OrdenService
 	//MODULO 3
 	Messages     *service.MessageService
 	Missions     *service.MissionService
@@ -29,12 +33,20 @@ func NewServer(
 	missions *service.MissionService,
 	usermissions *service.UserMissionService,
 	auth *service.AuthService,
+	categories *service.CategoriaService,
+	products *service.ProductoService,
+	orders *service.OrdenService,
+
 ) *Server {
 
 	return &Server{
 		Users:   users,
 		Reviews: reviews,
 		Badges:  badges,
+
+		Categoria: categories,
+		Producto:  products,
+		Ordern:    orders,
 
 		Messages:     messages,
 		Missions:     missions,

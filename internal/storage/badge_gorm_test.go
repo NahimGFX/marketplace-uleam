@@ -9,12 +9,16 @@ import (
 	"gorm.io/gorm"
 )
 
+// =========================
+// SETUP DB EN MEMORIA
+// =========================
 func setupBadgeDBTest(t *testing.T) *gorm.DB {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("no se pudo abrir la base de datos en memoria: %v", err)
 	}
 
+	// IMPORTANTE: crear la tabla en memoria
 	err = db.AutoMigrate(&models.Badge{})
 	if err != nil {
 		t.Fatalf("error en AutoMigrate: %v", err)
@@ -23,8 +27,11 @@ func setupBadgeDBTest(t *testing.T) *gorm.DB {
 	return db
 }
 
+// =========================
+// TEST CRUD BÁSICO BADGE
+// =========================
 func TestBadge_Crear_Buscar_Listar(t *testing.T) {
-	db := setupDBTest(t)
+	db := setupBadgeDBTest(t)
 
 	// CREAR
 	badge := models.Badge{
@@ -33,7 +40,10 @@ func TestBadge_Crear_Buscar_Listar(t *testing.T) {
 		RequiredRep: 100,
 	}
 
-	db.Create(&badge)
+	result := db.Create(&badge)
+	if result.Error != nil {
+		t.Fatalf("error al crear badge: %v", result.Error)
+	}
 
 	if badge.ID == 0 {
 		t.Fatalf("esperaba ID generado")
@@ -43,7 +53,7 @@ func TestBadge_Crear_Buscar_Listar(t *testing.T) {
 	var encontrado models.Badge
 	err := db.First(&encontrado, badge.ID).Error
 	if err != nil {
-		t.Fatalf("no se pudo encontrar el badge")
+		t.Fatalf("no se pudo encontrar el badge: %v", err)
 	}
 
 	if encontrado.Name != "Experto" {

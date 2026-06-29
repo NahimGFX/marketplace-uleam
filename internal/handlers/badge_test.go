@@ -21,22 +21,26 @@ import (
 )
 
 // ======================================================
-// FAKE
+// FAKE REPOSITORY (BADGES)
 // ======================================================
 
-type profileFake struct {
-	badges []models.Badge
+type badgeFake struct {
+	data   []models.Badge
 	nextID int
 }
 
-// ---------------- BADGES ----------------
-
-func (f *profileFake) ListarBadges() []models.Badge {
-	return f.badges
+func nuevoBadgeFake() *badgeFake {
+	return &badgeFake{data: []models.Badge{}}
 }
 
-func (f *profileFake) BuscarBadgePorID(id int) (models.Badge, bool) {
-	for _, b := range f.badges {
+// ---------------- BADGES CRUD ----------------
+
+func (f *badgeFake) ListarBadges() []models.Badge {
+	return f.data
+}
+
+func (f *badgeFake) BuscarBadgePorID(id int) (models.Badge, bool) {
+	for _, b := range f.data {
 		if b.ID == id {
 			return b, true
 		}
@@ -44,78 +48,65 @@ func (f *profileFake) BuscarBadgePorID(id int) (models.Badge, bool) {
 	return models.Badge{}, false
 }
 
-func (f *profileFake) CrearBadge(b models.Badge) models.Badge {
+func (f *badgeFake) CrearBadge(b models.Badge) models.Badge {
 	f.nextID++
 	b.ID = f.nextID
-	f.badges = append(f.badges, b)
+	f.data = append(f.data, b)
 	return b
 }
 
-func (f *profileFake) ActualizarBadge(id int, b models.Badge) (models.Badge, bool) {
-	for i := range f.badges {
-		if f.badges[i].ID == id {
+func (f *badgeFake) ActualizarBadge(id int, b models.Badge) (models.Badge, bool) {
+	for i := range f.data {
+		if f.data[i].ID == id {
 			b.ID = id
-			f.badges[i] = b
+			f.data[i] = b
 			return b, true
 		}
 	}
 	return models.Badge{}, false
 }
 
-func (f *profileFake) BorrarBadge(id int) bool {
-	return true
+func (f *badgeFake) BorrarBadge(id int) bool {
+	for i := range f.data {
+		if f.data[i].ID == id {
+			f.data = append(f.data[:i], f.data[i+1:]...)
+			return true
+		}
+	}
+	return false
 }
 
-// ---------------- USERS ----------------
+// ======================================================
+// IMPLEMENTAR INTERFAZ COMPLETA (OBLIGATORIO)
+// ======================================================
 
-func (f *profileFake) ListarUsers() []models.User { return nil }
-
-func (f *profileFake) BuscarUserPorID(id int) (models.User, bool) {
+func (f *badgeFake) ListarUsers() []models.User { return nil }
+func (f *badgeFake) BuscarUserPorID(id int) (models.User, bool) {
 	return models.User{}, false
 }
-
-func (f *profileFake) CrearUser(u models.User) models.User {
-	return u
-}
-
-func (f *profileFake) ActualizarUser(id int, u models.User) (models.User, bool) {
+func (f *badgeFake) CrearUser(u models.User) models.User { return u }
+func (f *badgeFake) ActualizarUser(id int, u models.User) (models.User, bool) {
 	return u, false
 }
+func (f *badgeFake) BorrarUser(id int) bool { return false }
 
-func (f *profileFake) BorrarUser(id int) bool {
-	return false
-}
-
-// ---------------- REVIEWS ----------------
-
-func (f *profileFake) ListarReviews() []models.Review {
-	return nil
-}
-
-func (f *profileFake) BuscarReviewPorID(id int) (models.Review, bool) {
+func (f *badgeFake) ListarReviews() []models.Review { return nil }
+func (f *badgeFake) BuscarReviewPorID(id int) (models.Review, bool) {
 	return models.Review{}, false
 }
-
-func (f *profileFake) CrearReview(r models.Review) models.Review {
-	return r
-}
-
-func (f *profileFake) ActualizarReview(id int, r models.Review) (models.Review, bool) {
+func (f *badgeFake) CrearReview(r models.Review) models.Review { return r }
+func (f *badgeFake) ActualizarReview(id int, r models.Review) (models.Review, bool) {
 	return r, false
 }
+func (f *badgeFake) BorrarReview(id int) bool { return false }
 
-func (f *profileFake) BorrarReview(id int) bool {
-	return false
-}
-
-var _ storage.PerfilRepository = (*profileFake)(nil)
+var _ storage.PerfilRepository = (*badgeFake)(nil)
 
 // ======================================================
 // JWT
 // ======================================================
 
-func genJWTValido() string {
-
+func generarJWTBadge() string {
 	secret := []byte("marketplace-uleam-secreto-demo-cambiar-en-S12")
 
 	claims := service.Claims{
@@ -129,29 +120,31 @@ func genJWTValido() string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	s, _ := token.SignedString(secret)
-
 	return s
 }
 
 // ======================================================
-// ROUTER
+// ENTORNO DE TEST
 // ======================================================
 
-func constEntorno() http.Handler {
+func construirEntornoBadge() http.Handler {
 
-	repo := &profileFake{}
+	repo := nuevoBadgeFake()
 
 	badgeSvc := service.NuevoBadgeService(repo)
 	authSvc := service.NuevoAuthService(nil)
 
 	server := handlers.NewServer(
-		nil,
-		nil,
-		badgeSvc,
-		nil,
-		nil,
-		nil,
-		authSvc,
+		nil,      // UserService
+		nil,      // ReviewService
+		badgeSvc, // BadgeService
+		nil,      // MessageService
+		nil,      // MissionService
+		nil,      // UserMissionService
+		authSvc,  // AuthService
+		nil,      // CategoriaService
+		nil,      // ProductoService
+		nil,      // OrdenService
 	)
 
 	r := chi.NewRouter()
@@ -159,28 +152,24 @@ func constEntorno() http.Handler {
 	r.Route("/api/v1", func(r chi.Router) {
 
 		r.Group(func(r chi.Router) {
-
 			r.Use(middleware.Auth(authSvc))
 
 			r.Post("/badges", server.CrearBadge)
 			r.Get("/badges", server.ListarBadges)
-
 		})
-
 	})
 
 	return r
 }
 
 // ======================================================
-// TEST CREAR
+// TEST 1: CREAR BADGE
 // ======================================================
 
 func TestCrearBadge_OK(t *testing.T) {
 
-	h := construirEntorno()
-
-	token := generarJWTValido()
+	h := construirEntornoBadge()
+	token := generarJWTBadge()
 
 	body := `{
 		"name":"Experto",
@@ -188,12 +177,9 @@ func TestCrearBadge_OK(t *testing.T) {
 		"required_rep":100
 	}`
 
-	req := httptest.NewRequest(http.MethodPost,
-		"/api/v1/badges",
-		strings.NewReader(body))
-
-	req.Header.Set("Authorization", "Bearer "+token)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/badges", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	rec := httptest.NewRecorder()
 
@@ -201,28 +187,22 @@ func TestCrearBadge_OK(t *testing.T) {
 
 	require.Equal(t, http.StatusCreated, rec.Code)
 
-	var badge models.Badge
+	var resp models.Badge
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 
-	require.NoError(t,
-		json.NewDecoder(rec.Body).Decode(&badge))
-
-	assert.Equal(t, "Experto", badge.Name)
+	assert.Equal(t, "Experto", resp.Name)
 }
 
 // ======================================================
-// TEST LISTAR
+// TEST 2: LISTAR BADGES
 // ======================================================
 
-func TestListarBadges(t *testing.T) {
+func TestListarBadges_OK(t *testing.T) {
 
-	h := construirEntorno()
+	h := construirEntornoBadge()
+	token := generarJWTBadge()
 
-	token := generarJWTValido()
-
-	req := httptest.NewRequest(http.MethodGet,
-		"/api/v1/badges",
-		nil)
-
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/badges", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	rec := httptest.NewRecorder()
@@ -233,16 +213,14 @@ func TestListarBadges(t *testing.T) {
 }
 
 // ======================================================
-// TEST 401
+// TEST 3: SIN TOKEN (401)
 // ======================================================
 
-func Test_RutaProtegida_SinToken(t *testing.T) {
+func TestBadge_SinToken(t *testing.T) {
 
-	h := construirEntorno()
+	h := construirEntornoBadge()
 
-	req := httptest.NewRequest(http.MethodPost,
-		"/api/v1/badges",
-		strings.NewReader(`{"name":"Experto"}`))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/badges", strings.NewReader(`{"name":"Experto"}`))
 
 	rec := httptest.NewRecorder()
 
