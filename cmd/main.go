@@ -31,6 +31,12 @@ func main() {
 	}
 
 	if err := gdb.AutoMigrate(
+		&models.User{},
+		&models.Review{},
+		&models.Badge{},
+		&models.Categoria{},
+		&models.Producto{},
+		&models.Orden{},
 		&models.Message{},
 		&models.Mission{},
 		&models.UserMission{},
@@ -71,6 +77,12 @@ func main() {
 	// =========================
 	// SERVICIOS
 	// =========================
+	userService := service.NuevoUserService(almacen)
+	reviewService := service.NuevoReviewService(almacen)
+	badgeService := service.NuevoBadgeService(almacen)
+	categoriaService := service.NewCategoriaService(almacen)
+	productoService := service.NewPorductoService(almacen)
+	ordenService := service.NewOrdenService(almacen)
 	messageService := service.NuevoMessageService(almacen)
 	missionService := service.NuevoMissionService(almacen)
 	userMissionService := service.NuevoUserMissionService(almacen)
@@ -80,10 +92,16 @@ func main() {
 	// SERVER
 	// =========================
 	servidor := handlers.NewServer(
-		messageService,
-		missionService,
-		userMissionService,
-		authService,
+		userService,        // UserService
+		reviewService,      // ReviewService
+		badgeService,       // BadgeService
+		messageService,     // MessageService
+		missionService,     // MissionService
+		userMissionService, // UserMissionService
+		authService,        // AuthService
+		categoriaService,   // CategoriaService
+		productoService,    // ProductoService
+		ordenService,       // OrdenService
 	)
 
 	// =========================
@@ -95,8 +113,8 @@ func main() {
 	r.Use(middleware.CORS)
 
 	r.Route("/api/v1", func(r chi.Router) {
-		routes.PerfilRoutes(r, servidor)
-		routes.MarketplaceRoutes(r, servidor)
+		routes.PerfilRoutes(r, servidor, authService)
+		routes.MarketplaceRoutes(r, servidor, authService)
 		routes.AuthRoutes(r, servidor)
 		routes.ComunidadRoutes(r, servidor, authService)
 	})

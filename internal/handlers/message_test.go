@@ -136,6 +136,10 @@ func construirEntorno() http.Handler {
 		nil,        // MissionService
 		nil,        // UserMissionService
 		authSvc,    // AuthService
+		nil,        // CategoriaService
+		nil,        // ProductoService
+		nil,        // OrdenService
+
 	)
 
 	r := chi.NewRouter()

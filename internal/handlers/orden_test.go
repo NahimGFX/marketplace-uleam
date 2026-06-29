@@ -118,13 +118,16 @@ func construirEntornoOrden() http.Handler {
 	authSvc := service.NuevoAuthService(nil)
 
 	server := handlers.NewServer(
-		nil,
-		nil,
-		nil,
-		authSvc,
-		nil,
-		nil,
-		ordenSvc,
+		nil,      // UserService
+		nil,      // ReviewService
+		nil,      // BadgeService
+		nil,      // MessageService
+		nil,      // MissionService
+		nil,      // UserMissionService
+		authSvc,  // AuthService
+		nil,      // CategoriaService
+		nil,      // ProductoService
+		ordenSvc, // OrdenService
 	)
 
 	r := chi.NewRouter()

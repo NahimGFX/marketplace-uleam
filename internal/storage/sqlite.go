@@ -278,6 +278,135 @@ func (s *AlmacenSQLite) BorrarUserMission(id int) bool {
 	return result.RowsAffected > 0
 }
 
+// =========================
+// CATEGORIAS
+// =========================
+
+func (s *AlmacenSQLite) ListarCategorias() []models.Categoria {
+	var categorias []models.Categoria
+	s.db.Find(&categorias)
+	return categorias
+}
+
+func (s *AlmacenSQLite) BuscarCategoriaPorID(id int) (models.Categoria, bool) {
+	var categoria models.Categoria
+
+	if err := s.db.First(&categoria, id).Error; err != nil {
+		return models.Categoria{}, false
+	}
+
+	return categoria, true
+}
+
+func (s *AlmacenSQLite) CrearCategoria(c models.Categoria) models.Categoria {
+	s.db.Create(&c)
+	return c
+}
+
+func (s *AlmacenSQLite) ActualizarCategoria(id int, datos models.Categoria) (models.Categoria, bool) {
+	var categoria models.Categoria
+
+	if err := s.db.First(&categoria, id).Error; err != nil {
+		return models.Categoria{}, false
+	}
+
+	datos.ID = id
+	s.db.Save(&datos)
+
+	return datos, true
+}
+
+func (s *AlmacenSQLite) BorrarCategoria(id int) bool {
+	result := s.db.Delete(&models.Categoria{}, id)
+	return result.RowsAffected > 0
+}
+
+// =========================
+// PRODUCTOS
+// =========================
+
+func (s *AlmacenSQLite) ListarProductos() []models.Producto {
+	var productos []models.Producto
+	s.db.Find(&productos)
+	return productos
+}
+
+func (s *AlmacenSQLite) BuscarProductoPorID(id int) (models.Producto, bool) {
+	var producto models.Producto
+
+	if err := s.db.First(&producto, id).Error; err != nil {
+		return models.Producto{}, false
+	}
+
+	return producto, true
+}
+
+func (s *AlmacenSQLite) CrearProducto(p models.Producto) models.Producto {
+	s.db.Create(&p)
+	return p
+}
+
+func (s *AlmacenSQLite) ActualizarProducto(id int, datos models.Producto) (models.Producto, bool) {
+	var producto models.Producto
+
+	if err := s.db.First(&producto, id).Error; err != nil {
+		return models.Producto{}, false
+	}
+
+	datos.ID = id
+	s.db.Save(&datos)
+
+	return datos, true
+}
+
+func (s *AlmacenSQLite) BorrarProducto(id int) bool {
+	result := s.db.Delete(&models.Producto{}, id)
+	return result.RowsAffected > 0
+}
+
+// =========================
+// ORDENES
+// =========================
+
+func (s *AlmacenSQLite) ListarOrdenes() []models.Orden {
+	var ordenes []models.Orden
+	s.db.Find(&ordenes)
+	return ordenes
+}
+
+func (s *AlmacenSQLite) BuscarOrdenPorID(id int) (models.Orden, bool) {
+	var orden models.Orden
+
+	if err := s.db.First(&orden, id).Error; err != nil {
+		return models.Orden{}, false
+	}
+
+	return orden, true
+}
+
+func (s *AlmacenSQLite) CrearOrden(o models.Orden) models.Orden {
+	s.db.Create(&o)
+	return o
+}
+
+func (s *AlmacenSQLite) ActualizarOrden(id int, datos models.Orden) (models.Orden, bool) {
+	var orden models.Orden
+
+	if err := s.db.First(&orden, id).Error; err != nil {
+		return models.Orden{}, false
+	}
+
+	datos.ID = id
+	s.db.Save(&datos)
+
+	return datos, true
+}
+
+func (s *AlmacenSQLite) BorrarOrden(id int) bool {
+	result := s.db.Delete(&models.Orden{}, id)
+	return result.RowsAffected > 0
+}
+
 //
 // SEED (DATOS INICIALES)
 //
@@ -288,16 +417,18 @@ func (a *AlmacenSQLite) SembrarSiVacio() {
 	// =========================
 	// USERS
 	// =========================
+	a.db.Model(&models.User{}).Count(&n)
 	if n == 0 {
 		users := []models.User{
-			{ID: 1, Name: "Juan Perez", Email: "juan@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 20},
-			{ID: 2, Name: "Maria Lopez", Email: "maria@uleam.edu.ec", Password: "123456", Level: 2, Reputation: 75},
-			{ID: 3, Name: "Carlos Zambrano", Email: "carlos@uleam.edu.ec", Password: "123456", Level: 3, Reputation: 150},
-			{ID: 4, Name: "Andrea Vera", Email: "andrea@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 30},
-			{ID: 5, Name: "Luis Mendoza", Email: "luis@uleam.edu.ec", Password: "123456", Level: 4, Reputation: 220},
-			{ID: 6, Name: "Sofia Cedeño", Email: "sofia@uleam.edu.ec", Password: "123456", Level: 2, Reputation: 90},
-			{ID: 7, Name: "Kevin Alcivar", Email: "kevin@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 15},
+			{Name: "Juan Perez", Email: "juan@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 20},
+			{Name: "Maria Lopez", Email: "maria@uleam.edu.ec", Password: "123456", Level: 2, Reputation: 75},
+			{Name: "Carlos Zambrano", Email: "carlos@uleam.edu.ec", Password: "123456", Level: 3, Reputation: 150},
+			{Name: "Andrea Vera", Email: "andrea@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 30},
+			{Name: "Luis Mendoza", Email: "luis@uleam.edu.ec", Password: "123456", Level: 4, Reputation: 220},
+			{Name: "Sofia Cedeño", Email: "sofia@uleam.edu.ec", Password: "123456", Level: 2, Reputation: 90},
+			{Name: "Kevin Alcivar", Email: "kevin@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 15},
 		}
+
 		a.db.Create(&users)
 	}
 
@@ -306,13 +437,13 @@ func (a *AlmacenSQLite) SembrarSiVacio() {
 	// =========================
 	if n == 0 {
 		reviews := []models.Review{
-			{ID: 1, ReviewerID: 2, ReviewedID: 1, Rating: 5, Comment: "Excelente vendedor, todo fue rapido y seguro"},
-			{ID: 2, ReviewerID: 1, ReviewedID: 3, Rating: 4, Comment: "Buena comunicacion y entrega puntual"},
-			{ID: 3, ReviewerID: 4, ReviewedID: 2, Rating: 5, Comment: "Muy amable y responsable"},
-			{ID: 4, ReviewerID: 5, ReviewedID: 1, Rating: 4, Comment: "El producto estaba en buen estado"},
-			{ID: 5, ReviewerID: 6, ReviewedID: 4, Rating: 5, Comment: "Recomendado para futuras compras"},
-			{ID: 6, ReviewerID: 7, ReviewedID: 5, Rating: 3, Comment: "La entrega demoro un poco pero llego bien"},
-			{ID: 7, ReviewerID: 3, ReviewedID: 6, Rating: 5, Comment: "Excelente experiencia de compra"},
+			{ReviewerID: 2, ReviewedID: 1, Rating: 5, Comment: "Excelente vendedor, todo fue rapido y seguro"},
+			{ReviewerID: 1, ReviewedID: 3, Rating: 4, Comment: "Buena comunicacion y entrega puntual"},
+			{ReviewerID: 4, ReviewedID: 2, Rating: 5, Comment: "Muy amable y responsable"},
+			{ReviewerID: 5, ReviewedID: 1, Rating: 4, Comment: "El producto estaba en buen estado"},
+			{ReviewerID: 6, ReviewedID: 4, Rating: 5, Comment: "Recomendado para futuras compras"},
+			{ReviewerID: 7, ReviewedID: 5, Rating: 3, Comment: "La entrega demoro un poco pero llego bien"},
+			{ReviewerID: 3, ReviewedID: 6, Rating: 5, Comment: "Excelente experiencia de compra"},
 		}
 		a.db.Create(&reviews)
 	}
@@ -321,17 +452,59 @@ func (a *AlmacenSQLite) SembrarSiVacio() {
 	// BADGES
 	// =========================
 	if n == 0 {
-		badges := []models.Badge{
-			{ID: 1, Name: "Novato", Description: "Alcanza 10 puntos de reputacion", RequiredRep: 10},
-			{ID: 2, Name: "Colaborador", Description: "Alcanza 50 puntos de reputacion", RequiredRep: 50},
-			{ID: 3, Name: "Vendedor Confiable", Description: "Alcanza 100 puntos de reputacion", RequiredRep: 100},
-			{ID: 4, Name: "Comerciante Experto", Description: "Alcanza 200 puntos de reputacion", RequiredRep: 200},
-			{ID: 5, Name: "Tutor Destacado", Description: "Recibe excelentes calificaciones de otros usuarios", RequiredRep: 300},
-			{ID: 6, Name: "Embajador ULEAM", Description: "Mantiene una reputacion sobresaliente en la plataforma", RequiredRep: 500},
-			{ID: 7, Name: "Leyenda ULEAM", Description: "Alcanza el maximo reconocimiento dentro del marketplace", RequiredRep: 1000},
+		b := []models.Badge{
+			{Name: "Novato", Description: "Alcanza 10 puntos de reputacion", RequiredRep: 10},
+			{Name: "Colaborador", Description: "Alcanza 50 puntos de reputacion", RequiredRep: 50},
+			{Name: "Vendedor Confiable", Description: "Alcanza 100 puntos de reputacion", RequiredRep: 100},
+			{Name: "Comerciante Experto", Description: "Alcanza 200 puntos de reputacion", RequiredRep: 200},
+			{Name: "Tutor Destacado", Description: "Recibe excelentes calificaciones de otros usuarios", RequiredRep: 300},
+			{Name: "Embajador ULEAM", Description: "Mantiene una reputacion sobresaliente en la plataforma", RequiredRep: 500},
+			{Name: "Leyenda ULEAM", Description: "Alcanza el maximo reconocimiento dentro del marketplace", RequiredRep: 1000},
 		}
-		a.db.Create(&badges)
+		a.db.Create(&b)
 	}
+
+	// =========================
+	// REVIEWS
+	// =========================
+	// Si ya hay mensajes, asumimos que ya está sembrado
+	a.db.Model(&models.Categoria{}).Count(&n)
+	if n > 0 {
+		return
+	}
+
+	categorias := []models.Categoria{
+		{Name: "Libros"},
+		{Name: "Equipos tecnológicos"},
+		{Name: "Material de laboratorio"},
+		{Name: "Uniformes"},
+		{Name: "Accesorios universitarios"},
+		{Name: "Otros"},
+	}
+
+	a.db.Create(&categorias)
+
+	productos := []models.Producto{
+		{Nombre: "Libro de Programación", Descripcion: "Un libro completo sobre programación en Go.", Precio: 25.99, CategoriaID: 1},
+		{Nombre: "Libro de Física General", Descripcion: "Libro en buen estado para ingeniería.", Precio: 20.00, CategoriaID: 1},
+		{Nombre: "Laptop Lenovo ThinkPad P15", Descripcion: "Laptop ideal para proyectos académicos.", Precio: 680.00, CategoriaID: 3},
+		{Nombre: "Calculadora Científica Casio", Descripcion: "Para matemáticas y física.", Precio: 20.00, CategoriaID: 4},
+		{Nombre: "Bata de laboratorio", Descripcion: "Protección para prácticas.", Precio: 15.00, CategoriaID: 3},
+		{Nombre: "Kit de disección", Descripcion: "Prácticas de biología.", Precio: 22.00, CategoriaID: 3},
+		{Nombre: "Mochila universitaria", Descripcion: "Resistente para libros y laptop.", Precio: 35.00, CategoriaID: 5},
+		{Nombre: "Estuche para laptop", Descripcion: "Protección portátil.", Precio: 12.00, CategoriaID: 5},
+		{Nombre: "Organizador de escritorio", Descripcion: "Orden para materiales.", Precio: 10.00, CategoriaID: 6},
+	}
+
+	a.db.Create(&productos)
+
+	ordenes := []models.Orden{
+		{ID: 1, ProductoID: 1, IDComprador: 2, Estado: "Pendiente"},
+		{ID: 2, ProductoID: 3, IDComprador: 4, Estado: "Enviado"},
+		{ID: 3, ProductoID: 5, IDComprador: 1, Estado: "Entregado"},
+		{ID: 4, ProductoID: 9, IDComprador: 2, Estado: "Cancelado"},
+	}
+	a.db.Create(&ordenes)
 
 	// Si ya hay mensajes, asumimos que ya está sembrado
 	a.db.Model(&models.Message{}).Count(&n)

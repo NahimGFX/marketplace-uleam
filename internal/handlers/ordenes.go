@@ -17,7 +17,7 @@ import (
 
 // ListarCategorias atiende GET /api/v1/categorias.
 func (s *Server) ListarCategorias(w http.ResponseWriter, _ *http.Request) {
-	RespondJSON(w, http.StatusOK, s.Categorias.Listar())
+	RespondJSON(w, http.StatusOK, s.Categoria.Listar())
 }
 
 // ObtenerCategoria atiende GET /api/v1/categorias/{id}.
@@ -27,7 +27,7 @@ func (s *Server) ObtenerCategoria(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
 		return
 	}
-	categoria, encontrado := s.Categorias.Obtener(id)
+	categoria, encontrado := s.Categoria.Obtener(id)
 	if !encontrado {
 		RespondError(w, http.StatusNotFound, "categoría no encontrada")
 		return
@@ -46,7 +46,7 @@ func (s *Server) CrearCategoria(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "el campo nombre es obligatorio")
 		return
 	}
-	creada, err := s.Categorias.Crear(nueva)
+	creada, err := s.Categoria.Crear(nueva)
 	if err != nil {
 		RespondError(w, statusDeError(err), err.Error())
 		return
@@ -70,7 +70,7 @@ func (s *Server) ActualizarCategoria(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "el campo nombre es obligatorio")
 		return
 	}
-	actualizada, err := s.Categorias.Actualizar(id, datos)
+	actualizada, err := s.Categoria.Actualizar(id, datos)
 	if err != nil {
 		RespondError(w, statusDeError(err), err.Error())
 		return
@@ -85,7 +85,7 @@ func (s *Server) BorrarCategoria(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
 		return
 	}
-	if err := s.Categorias.Borrar(id); err != nil {
+	if err := s.Categoria.Borrar(id); err != nil {
 		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
@@ -98,7 +98,7 @@ func (s *Server) BorrarCategoria(w http.ResponseWriter, r *http.Request) {
 
 // ListarProductos atiende GET /api/v1/productos.
 func (s *Server) ListarProductos(w http.ResponseWriter, _ *http.Request) {
-	RespondJSON(w, http.StatusOK, s.Productos.Listar())
+	RespondJSON(w, http.StatusOK, s.Producto.Listar())
 }
 
 // ObtenerProducto atiende GET /api/v1/productos/{id}.
@@ -108,7 +108,7 @@ func (s *Server) ObtenerProducto(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
 		return
 	}
-	producto, encontrado := s.Productos.Obtener(id)
+	producto, encontrado := s.Producto.Obtener(id)
 	if !encontrado {
 		RespondError(w, http.StatusNotFound, "producto no encontrado")
 		return
@@ -135,7 +135,7 @@ func (s *Server) CrearProducto(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "categoriaID es obligatorio")
 		return
 	}
-	creado, err := s.Productos.Crear(nuevo)
+	creado, err := s.Producto.Crear(nuevo)
 	if err != nil {
 		RespondError(w, statusDeError(err), err.Error())
 		return
@@ -171,7 +171,7 @@ func (s *Server) ActualizarProducto(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "categoriaID es obligatorio")
 		return
 	}
-	actualizado, err := s.Productos.Actualizar(id, datos)
+	actualizado, err := s.Producto.Actualizar(id, datos)
 	if err != nil {
 		RespondError(w, statusDeError(err), err.Error())
 		return
@@ -186,7 +186,7 @@ func (s *Server) BorrarProducto(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
 		return
 	}
-	if err := s.Productos.Borrar(id); err != nil {
+	if err := s.Producto.Borrar(id); err != nil {
 		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
@@ -199,7 +199,7 @@ func (s *Server) BorrarProducto(w http.ResponseWriter, r *http.Request) {
 
 // ListarOrdenes atiende GET /api/v1/ordenes.
 func (s *Server) ListarOrdenes(w http.ResponseWriter, _ *http.Request) {
-	RespondJSON(w, http.StatusOK, s.Ordenes.Listar())
+	RespondJSON(w, http.StatusOK, s.Ordern.Listar())
 }
 
 // ObtenerOrden atiende GET /api/v1/ordenes/{id}.
@@ -209,7 +209,7 @@ func (s *Server) ObtenerOrden(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
 		return
 	}
-	orden, encontrado := s.Ordenes.Obtener(id)
+	orden, encontrado := s.Ordern.Obtener(id)
 	if !encontrado {
 		RespondError(w, http.StatusNotFound, "orden no encontrada")
 		return
@@ -236,7 +236,7 @@ func (s *Server) CrearOrden(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "el campo estado es obligatorio")
 		return
 	}
-	creada, err := s.Ordenes.Crear(nueva)
+	creada, err := s.Ordern.Crear(nueva)
 	if err != nil {
 		RespondError(w, statusDeError(err), err.Error())
 		return
@@ -268,7 +268,7 @@ func (s *Server) ActualizarOrden(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "el campo estado es obligatorio")
 		return
 	}
-	actualizada, err := s.Ordenes.Actualizar(id, datos)
+	actualizada, err := s.Ordern.Actualizar(id, datos)
 	if err != nil {
 		RespondError(w, statusDeError(err), err.Error())
 		return
@@ -283,7 +283,7 @@ func (s *Server) BorrarOrden(w http.ResponseWriter, r *http.Request) {
 		RespondError(w, http.StatusBadRequest, "id debe ser un número entero")
 		return
 	}
-	if err := s.Ordenes.Borrar(id); err != nil {
+	if err := s.Ordern.Borrar(id); err != nil {
 		RespondError(w, statusDeError(err), err.Error())
 		return
 	}
