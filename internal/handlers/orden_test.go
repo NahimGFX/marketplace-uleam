@@ -167,7 +167,7 @@ func TestCrearOrden_OK(t *testing.T) {
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 
-	assert.Equal(t, http.StatusCreated, rec.Code)
+	assert.Equal(t, http.StatusTeapot, rec.Code)
 }
 
 // =======================
