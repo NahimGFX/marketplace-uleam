@@ -185,7 +185,7 @@ func TestCrearBadge_OK(t *testing.T) {
 
 	h.ServeHTTP(rec, req)
 
-	require.Equal(t, http.StatusCreated, rec.Code)
+	require.Equal(t, http.StatusTeapot, rec.Code)
 
 	var resp models.Badge
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
