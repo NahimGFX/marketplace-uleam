@@ -85,8 +85,9 @@ type Almacen interface {
 // la convencion comma-ok ya no alcanza. Es justo el punto que conecta con los
 // errores de dominio de S12.
 type UserRepository interface {
-	CrearUsuario(u models.Usuario) (models.Usuario, error)
-	BuscarUsuarioPorEmail(email string) (models.Usuario, bool)
+	CrearUsuario(u models.User) (models.User, error)
+	BuscarUsuarioPorEmail(email string) (models.User, bool)
+	ActualizarPasswordUsuario(id int, password string) error
 }
 
 // Chequeo en tiempo de compilación: si Memoria dejara de cumplir Almacen,

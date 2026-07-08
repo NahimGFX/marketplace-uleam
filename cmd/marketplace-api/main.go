@@ -2,16 +2,18 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	_ "github.com/glebarez/go-sqlite"
 	"github.com/glebarez/sqlite"
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	"marketplace-api/internal/config"
 	"marketplace-api/internal/handlers"
 	"marketplace-api/internal/middleware"
 	"marketplace-api/internal/models"
@@ -21,11 +23,15 @@ import (
 )
 
 func main() {
+	cfg, err := config.Cargar()
+	if err != nil {
+		log.Fatal("configuracion invalida: ", err)
+	}
 
 	// =========================
 	// GORM (usuarios + migraciones)
 	// =========================
-	gdb, err := gorm.Open(sqlite.Open("marketplace.db"), &gorm.Config{})
+	gdb, err := abrirGORM(cfg)
 	if err != nil {
 		log.Fatal("no se pudo abrir la base de datos: ", err)
 	}
@@ -40,7 +46,6 @@ func main() {
 		&models.Message{},
 		&models.Mission{},
 		&models.UserMission{},
-		&models.Usuario{},
 	); err != nil {
 		log.Fatal("fallo AutoMigrate: ", err)
 	}
@@ -49,24 +54,23 @@ func main() {
 	almacenGorm.SembrarSiVacio()
 
 	// =========================
-	// BACKEND DINÁMICO (GORM o SQLC)
+	// BACKEND DINAMICO (GORM o SQLC)
 	// =========================
 	var almacen storage.Almacen
 
-	switch os.Getenv("STORAGE") {
-
+	switch cfg.Storage {
 	case "sqlc":
-		sdb, err := sql.Open("sqlite", "marketplace.db")
+		sdb, err := abrirSQLC(cfg)
 		if err != nil {
 			log.Fatal("no se pudo abrir sql.DB para sqlc: ", err)
 		}
 
 		almacen = storage.NuevoAlmacenSQLC(sdb)
-		log.Println("Backend productos/categorías: SQLC")
+		log.Println("Backend productos/categorias: SQLC")
 
 	default:
 		almacen = almacenGorm
-		log.Println("Backend productos/categorías: GORM")
+		log.Println("Backend productos/categorias: GORM")
 	}
 
 	// =========================
@@ -86,7 +90,7 @@ func main() {
 	messageService := service.NuevoMessageService(almacen)
 	missionService := service.NuevoMissionService(almacen)
 	userMissionService := service.NuevoUserMissionService(almacen)
-	authService := service.NuevoAuthService(usuarioRepo)
+	authService := service.NuevoAuthServiceConJWT(usuarioRepo, cfg.JWTSecreto, cfg.JWTDuracion)
 
 	// =========================
 	// SERVER
@@ -119,6 +123,31 @@ func main() {
 		routes.ComunidadRoutes(r, servidor, authService)
 	})
 
-	log.Println("Servidor escuchando en http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	httpServer := &http.Server{
+		Addr:         cfg.Puerto,
+		Handler:      r,
+		ReadTimeout:  cfg.HTTPReadTimeout,
+		WriteTimeout: cfg.HTTPWriteTimeout,
+	}
+
+	log.Printf("Servidor escuchando en http://localhost%s", cfg.Puerto)
+	log.Fatal(httpServer.ListenAndServe())
+}
+
+func abrirGORM(cfg config.Config) (*gorm.DB, error) {
+	switch cfg.DBDriver {
+	case "postgres":
+		return gorm.Open(postgres.Open(cfg.DBDSN), &gorm.Config{})
+	case "sqlite":
+		return gorm.Open(sqlite.Open(cfg.RutaDB), &gorm.Config{})
+	default:
+		return nil, fmt.Errorf("DB_DRIVER no soportado: %s", cfg.DBDriver)
+	}
+}
+
+func abrirSQLC(cfg config.Config) (*sql.DB, error) {
+	if cfg.DBDriver != "sqlite" {
+		return nil, fmt.Errorf("STORAGE=sqlc solo esta disponible con DB_DRIVER=sqlite")
+	}
+	return sql.Open("sqlite", cfg.RutaDB)
 }
