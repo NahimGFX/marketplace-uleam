@@ -3,6 +3,7 @@ package service
 import (
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"marketplace-api/internal/models"
@@ -10,89 +11,172 @@ import (
 )
 
 // =======================
-// FAKE REPOSITORY
+// MOCK REPOSITORY TESTIFY
 // =======================
 
-type comunidadRepoFake struct {
-	llamado bool
+type comunidadRepoMock struct {
+	mock.Mock
 }
 
-func (f *comunidadRepoFake) ListarMessages() []models.Message {
-	return nil
+// -------- MESSAGE --------
+
+func (m *comunidadRepoMock) ListarMessages() []models.Message {
+
+	args := m.Called()
+
+	return args.Get(0).([]models.Message)
 }
 
-func (f *comunidadRepoFake) BuscarMessagePorID(id int) (models.Message, bool) {
-	return models.Message{}, false
+func (m *comunidadRepoMock) BuscarMessagePorID(id int) (models.Message, bool) {
+
+	args := m.Called(id)
+
+	return args.Get(0).(models.Message), args.Bool(1)
 }
 
-func (f *comunidadRepoFake) CrearMessage(m models.Message) models.Message {
-	f.llamado = true
-	return m
+func (m *comunidadRepoMock) CrearMessage(msg models.Message) models.Message {
+
+	args := m.Called(msg)
+
+	return args.Get(0).(models.Message)
 }
 
-func (f *comunidadRepoFake) ActualizarMessage(id int, datos models.Message) (models.Message, bool) {
-	return models.Message{}, true
+func (m *comunidadRepoMock) ActualizarMessage(
+	id int,
+	msg models.Message,
+) (models.Message, bool) {
+
+	args := m.Called(id, msg)
+
+	return args.Get(0).(models.Message), args.Bool(1)
 }
 
-func (f *comunidadRepoFake) BorrarMessage(id int) bool {
-	return true
+func (m *comunidadRepoMock) BorrarMessage(id int) bool {
+
+	args := m.Called(id)
+
+	return args.Bool(0)
 }
 
-func (f *comunidadRepoFake) ListarMissions() []models.Mission {
-	return nil
+// -------- MISSION --------
+
+func (m *comunidadRepoMock) ListarMissions() []models.Mission {
+
+	args := m.Called()
+
+	return args.Get(0).([]models.Mission)
 }
 
-func (f *comunidadRepoFake) BuscarMisionPorID(id int) (models.Mission, bool) {
-	return models.Mission{}, false
+func (m *comunidadRepoMock) BuscarMisionPorID(id int) (models.Mission, bool) {
+
+	args := m.Called(id)
+
+	return args.Get(0).(models.Mission), args.Bool(1)
 }
 
-func (f *comunidadRepoFake) CrearMision(m models.Mission) models.Mission {
-	return m
+func (m *comunidadRepoMock) CrearMision(
+	mission models.Mission,
+) models.Mission {
+
+	args := m.Called(mission)
+
+	return args.Get(0).(models.Mission)
 }
 
-func (f *comunidadRepoFake) ActualizarMision(id int, datos models.Mission) (models.Mission, bool) {
-	return models.Mission{}, true
+func (m *comunidadRepoMock) ActualizarMision(
+	id int,
+	mission models.Mission,
+) (models.Mission, bool) {
+
+	args := m.Called(id, mission)
+
+	return args.Get(0).(models.Mission), args.Bool(1)
 }
 
-func (f *comunidadRepoFake) BorrarMision(id int) bool {
-	return true
+func (m *comunidadRepoMock) BorrarMision(id int) bool {
+
+	args := m.Called(id)
+
+	return args.Bool(0)
 }
 
-func (f *comunidadRepoFake) ListarUserMissions() []models.UserMission {
-	return nil
+// -------- USER MISSION --------
+
+func (m *comunidadRepoMock) ListarUserMissions() []models.UserMission {
+
+	args := m.Called()
+
+	return args.Get(0).([]models.UserMission)
 }
 
-func (f *comunidadRepoFake) BuscarUserMissionPorID(id int) (models.UserMission, bool) {
-	return models.UserMission{}, false
+func (m *comunidadRepoMock) BuscarUserMissionPorID(
+	id int,
+) (models.UserMission, bool) {
+
+	args := m.Called(id)
+
+	return args.Get(0).(models.UserMission), args.Bool(1)
 }
 
-func (f *comunidadRepoFake) CrearUserMission(m models.UserMission) models.UserMission {
-	return m
+func (m *comunidadRepoMock) CrearUserMission(
+	um models.UserMission,
+) models.UserMission {
+
+	args := m.Called(um)
+
+	return args.Get(0).(models.UserMission)
 }
 
-func (f *comunidadRepoFake) ActualizarUserMission(id int, datos models.UserMission) (models.UserMission, bool) {
-	return models.UserMission{}, true
+func (m *comunidadRepoMock) ActualizarUserMission(
+	id int,
+	um models.UserMission,
+) (models.UserMission, bool) {
+
+	args := m.Called(id, um)
+
+	return args.Get(0).(models.UserMission), args.Bool(1)
 }
 
-func (f *comunidadRepoFake) BorrarUserMission(id int) bool {
-	return true
+func (m *comunidadRepoMock) BorrarUserMission(id int) bool {
+
+	args := m.Called(id)
+
+	return args.Bool(0)
 }
 
-// Verificación de interfaz
-var _ storage.ComunidadRepository = (*comunidadRepoFake)(nil)
+// verificar interfaz
+var _ storage.ComunidadRepository = (*comunidadRepoMock)(nil)
 
 // =======================
-// TEST
+// TEST REGLA NEGOCIO
 // =======================
 
-func TestMessageService_ContentVacio(t *testing.T) {
-	repo := &comunidadRepoFake{}
-	svc := NuevoMessageService(repo)
+func TestMessageService_ContentVacio_NoLlegaRepositorio(t *testing.T) {
 
-	_, err := svc.Crear(models.Message{
-		Content: "",
-	})
+	repo := new(comunidadRepoMock)
 
-	require.ErrorIs(t, err, ErrContentVacio)
-	require.False(t, repo.llamado, "el repositorio no debía ser llamado")
+	service := NuevoMessageService(repo)
+
+	_, err := service.Crear(
+		models.Message{
+			Content: "",
+		},
+	)
+
+	require.ErrorIs(
+		t,
+		err,
+		ErrContentVacio,
+	)
+
+	// IMPORTANTE:
+	// No ponemos repo.On("CrearMessage")
+	// porque el repositorio NO debe ejecutarse.
+
+	repo.AssertNotCalled(
+		t,
+		"CrearMessage",
+		mock.Anything,
+	)
+
 }
