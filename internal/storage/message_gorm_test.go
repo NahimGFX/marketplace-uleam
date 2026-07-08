@@ -23,7 +23,10 @@ func TestMessage_Crear_Buscar_Listar(t *testing.T) {
 	db := setupDBTest(t)
 
 	// CREAR
-	message := models.Message{Content: "hola mundo"}
+	message := models.Message{
+		SenderID:   1,
+		ReceiverID: 1,
+		Content:    "hola mundo"}
 	db.Create(&message)
 
 	if message.ID == 0 {
@@ -35,6 +38,12 @@ func TestMessage_Crear_Buscar_Listar(t *testing.T) {
 	err := db.First(&encontrado, message.ID).Error
 	if err != nil {
 		t.Fatalf("no se pudo encontrar el mensaje")
+	}
+	if encontrado.SenderID != 1 {
+		t.Fatalf("SenderID incorrecto")
+	}
+	if encontrado.ReceiverID != 1 {
+		t.Fatalf("ReceiverID incorrecto")
 	}
 
 	if encontrado.Content != "hola mundo" {
