@@ -3,96 +3,103 @@ package service
 import (
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"marketplace-api/internal/models"
-	"marketplace-api/internal/storage"
 )
 
-// =======================
-// FAKE REPOSITORY
-// =======================
-
-type comunidadRepoFake struct {
-	llamado bool
-}
-
-func (f *comunidadRepoFake) ListarMessages() []models.Message {
-	return nil
-}
-
-func (f *comunidadRepoFake) BuscarMessagePorID(id int) (models.Message, bool) {
-	return models.Message{}, false
-}
-
-func (f *comunidadRepoFake) CrearMessage(m models.Message) models.Message {
-	f.llamado = true
-	return m
-}
-
-func (f *comunidadRepoFake) ActualizarMessage(id int, datos models.Message) (models.Message, bool) {
-	return models.Message{}, true
-}
-
-func (f *comunidadRepoFake) BorrarMessage(id int) bool {
-	return true
-}
-
-func (f *comunidadRepoFake) ListarMissions() []models.Mission {
-	return nil
-}
-
-func (f *comunidadRepoFake) BuscarMisionPorID(id int) (models.Mission, bool) {
-	return models.Mission{}, false
-}
-
-func (f *comunidadRepoFake) CrearMision(m models.Mission) models.Mission {
-	return m
-}
-
-func (f *comunidadRepoFake) ActualizarMision(id int, datos models.Mission) (models.Mission, bool) {
-	return models.Mission{}, true
-}
-
-func (f *comunidadRepoFake) BorrarMision(id int) bool {
-	return true
-}
-
-func (f *comunidadRepoFake) ListarUserMissions() []models.UserMission {
-	return nil
-}
-
-func (f *comunidadRepoFake) BuscarUserMissionPorID(id int) (models.UserMission, bool) {
-	return models.UserMission{}, false
-}
-
-func (f *comunidadRepoFake) CrearUserMission(m models.UserMission) models.UserMission {
-	return m
-}
-
-func (f *comunidadRepoFake) ActualizarUserMission(id int, datos models.UserMission) (models.UserMission, bool) {
-	return models.UserMission{}, true
-}
-
-func (f *comunidadRepoFake) BorrarUserMission(id int) bool {
-	return true
-}
-
-// Verificación de interfaz
-var _ storage.ComunidadRepository = (*comunidadRepoFake)(nil)
-
-// =======================
-// TEST
-// =======================
-
-func TestMessageService_ContentVacio(t *testing.T) {
-	repo := &comunidadRepoFake{}
+func TestMessageService_ContentVacio_NoLlegaRepositorio(t *testing.T) {
+	repo := new(comunidadRepoMock)
 	svc := NuevoMessageService(repo)
 
-	_, err := svc.Crear(models.Message{
-		Content: "",
-	})
+	_, err := svc.Crear(models.Message{Content: "   "})
 
 	require.ErrorIs(t, err, ErrContentVacio)
-	require.False(t, repo.llamado, "el repositorio no debía ser llamado")
+	repo.AssertNotCalled(t, "CrearMessage", mock.Anything)
+	repo.AssertExpectations(t)
+}
+
+func TestMessageService_CrearValido_LlegaRepositorio(t *testing.T) {
+	repo := new(comunidadRepoMock)
+	svc := NuevoMessageService(repo)
+	msg := models.Message{
+		SenderID:   1,
+		ReceiverID: 2,
+		Content:    "Hola",
+	}
+	guardado := msg
+	guardado.ID = 10
+
+	repo.On("CrearMessage", msg).Return(guardado).Once()
+
+	resultado, err := svc.Crear(msg)
+
+	require.NoError(t, err)
+	require.Equal(t, guardado, resultado)
+	repo.AssertExpectations(t)
+}
+
+func TestMessageService_ActualizarContentVacio_NoLlegaRepositorio(t *testing.T) {
+	repo := new(comunidadRepoMock)
+	svc := NuevoMessageService(repo)
+
+	_, err := svc.Actualizar(1, models.Message{Content: ""})
+
+	require.ErrorIs(t, err, ErrContentVacio)
+	repo.AssertNotCalled(t, "ActualizarMessage", mock.Anything, mock.Anything)
+	repo.AssertExpectations(t)
+}
+
+func TestMessageService_ActualizarNoEncontrado_RetornaError(t *testing.T) {
+	repo := new(comunidadRepoMock)
+	svc := NuevoMessageService(repo)
+	msg := models.Message{Content: "Mensaje editado"}
+
+	repo.On("ActualizarMessage", 99, msg).Return(models.Message{}, false).Once()
+
+	_, err := svc.Actualizar(99, msg)
+
+	require.ErrorIs(t, err, ErrNoEncontrado)
+	repo.AssertExpectations(t)
+}
+
+func TestMessageService_ActualizarValido_LlegaRepositorio(t *testing.T) {
+	repo := new(comunidadRepoMock)
+	svc := NuevoMessageService(repo)
+	msg := models.Message{Content: "Mensaje editado"}
+	actualizado := msg
+	actualizado.ID = 1
+
+	repo.On("ActualizarMessage", 1, msg).Return(actualizado, true).Once()
+
+	resultado, err := svc.Actualizar(1, msg)
+
+	require.NoError(t, err)
+	require.Equal(t, actualizado, resultado)
+	repo.AssertExpectations(t)
+}
+
+func TestMessageService_BorrarNoEncontrado_RetornaError(t *testing.T) {
+	repo := new(comunidadRepoMock)
+	svc := NuevoMessageService(repo)
+
+	repo.On("BorrarMessage", 99).Return(false).Once()
+
+	err := svc.Borrar(99)
+
+	require.ErrorIs(t, err, ErrNoEncontrado)
+	repo.AssertExpectations(t)
+}
+
+func TestMessageService_BorrarExistente_NoRetornaError(t *testing.T) {
+	repo := new(comunidadRepoMock)
+	svc := NuevoMessageService(repo)
+
+	repo.On("BorrarMessage", 1).Return(true).Once()
+
+	err := svc.Borrar(1)
+
+	require.NoError(t, err)
+	repo.AssertExpectations(t)
 }

@@ -1,0 +1,63 @@
+//line C:\Users\josti\OneDrive\Desktop\marketplace-uleam\internal\storage\memoria.go:1:1
+package storage
+
+import (
+	"marketplace-api/internal/models"
+	"sync"
+)
+
+type Memoria struct {
+	// MODULO 1
+	users        []models.User
+	nextUserID   int
+	reviews      []models.Review
+	nextReviewID int
+	badges       []models.Badge
+	nextBadgeID  int
+
+	// MODULO 2
+	categorias      []models.Categoria
+	nextCategoriaID int
+	productos       []models.Producto
+	nextProductoID  int
+	orden           []models.Orden
+	nextOrdenID     int
+
+	// MODULO 3
+	messages          []models.Message
+	nextMessageID     int
+	missions          []models.Mission
+	nextMissionID     int
+	usermissions      []models.UserMission
+	nextUserMissionID int
+
+	mu sync.RWMutex
+}
+
+func NuevaMemoria() *Memoria {goCover_5c21b0592bc4__36[0] = 1 ; goCover_5c21b0592bc4__36[1] = goCover_5c21b0592bc4_P ; goCover_5c21b0592bc4__36[2] = 36 ; goCover_5c21b0592bc4__36[3] = 1;
+	return &Memoria{
+		// MODULO 1
+		users:        []models.User{},
+		nextUserID:   1,
+		reviews:      []models.Review{},
+		nextReviewID: 1,
+		badges:       []models.Badge{},
+		nextBadgeID:  1,
+
+		// MODULO 2
+		categorias:      []models.Categoria{},
+		nextCategoriaID: 1,
+		productos:       []models.Producto{},
+		nextProductoID:  1,
+		orden:           []models.Orden{},
+		nextOrdenID:     1,
+
+		// MODULO 3
+		messages:          []models.Message{},
+		nextMessageID:     1,
+		missions:          []models.Mission{},
+		nextMissionID:     1,
+		usermissions:      []models.UserMission{},
+		nextUserMissionID: 1,
+	}
+}

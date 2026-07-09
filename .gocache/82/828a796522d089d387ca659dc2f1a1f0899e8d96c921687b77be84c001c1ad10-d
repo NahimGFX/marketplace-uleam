@@ -1,0 +1,10 @@
+covervars.go
+almacen.cover.go
+comunidad.cover.go
+marketplace.cover.go
+memoria.cover.go
+perfil.cover.go
+sqlc.cover.go
+sqlite.cover.go
+usuario.cover.go
+./message_gorm_test.go

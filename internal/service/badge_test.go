@@ -3,102 +3,14 @@ package service
 import (
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"marketplace-api/internal/models"
-	"marketplace-api/internal/storage"
 )
 
-// =======================
-// FAKE REPOSITORY
-// =======================
-
-type perfilRepoFake struct {
-	llamado bool
-}
-
-// =======================
-// BADGES
-// =======================
-
-func (f *perfilRepoFake) ListarBadges() []models.Badge {
-	return nil
-}
-
-func (f *perfilRepoFake) BuscarBadgePorID(id int) (models.Badge, bool) {
-	return models.Badge{}, false
-}
-
-func (f *perfilRepoFake) CrearBadge(b models.Badge) models.Badge {
-	f.llamado = true
-	return b
-}
-
-func (f *perfilRepoFake) ActualizarBadge(id int, datos models.Badge) (models.Badge, bool) {
-	return models.Badge{}, true
-}
-
-func (f *perfilRepoFake) BorrarBadge(id int) bool {
-	return true
-}
-
-// =======================
-// USERS
-// =======================
-
-func (f *perfilRepoFake) ListarUsers() []models.User {
-	return nil
-}
-
-func (f *perfilRepoFake) BuscarUserPorID(id int) (models.User, bool) {
-	return models.User{}, false
-}
-
-func (f *perfilRepoFake) CrearUser(u models.User) models.User {
-	return u
-}
-
-func (f *perfilRepoFake) ActualizarUser(id int, datos models.User) (models.User, bool) {
-	return models.User{}, true
-}
-
-func (f *perfilRepoFake) BorrarUser(id int) bool {
-	return true
-}
-
-// =======================
-// REVIEWS
-// =======================
-
-func (f *perfilRepoFake) ListarReviews() []models.Review {
-	return nil
-}
-
-func (f *perfilRepoFake) BuscarReviewPorID(id int) (models.Review, bool) {
-	return models.Review{}, false
-}
-
-func (f *perfilRepoFake) CrearReview(r models.Review) models.Review {
-	return r
-}
-
-func (f *perfilRepoFake) ActualizarReview(id int, datos models.Review) (models.Review, bool) {
-	return models.Review{}, true
-}
-
-func (f *perfilRepoFake) BorrarReview(id int) bool {
-	return true
-}
-
-// Verificación de interfaz
-var _ storage.PerfilRepository = (*perfilRepoFake)(nil)
-
-// =======================
-// TEST
-// =======================
-
-func TestBadgeService_NameVacio(t *testing.T) {
-	repo := &perfilRepoFake{}
+func TestBadgeService_NameVacio_NoLlegaRepositorio(t *testing.T) {
+	repo := new(perfilRepoMock)
 	svc := NuevoBadgeService(repo)
 
 	_, err := svc.Crear(models.Badge{
@@ -108,5 +20,69 @@ func TestBadgeService_NameVacio(t *testing.T) {
 	})
 
 	require.ErrorIs(t, err, ErrNombreVacio)
-	require.False(t, repo.llamado, "el repositorio no debía ser llamado")
+	repo.AssertNotCalled(t, "CrearBadge", mock.Anything)
+	repo.AssertExpectations(t)
+}
+
+func TestBadgeService_DescriptionVacia_NoLlegaRepositorio(t *testing.T) {
+	repo := new(perfilRepoMock)
+	svc := NuevoBadgeService(repo)
+
+	_, err := svc.Crear(models.Badge{
+		Name:        "Colaborador",
+		Description: " ",
+		RequiredRep: 100,
+	})
+
+	require.ErrorIs(t, err, ErrContentVacio)
+	repo.AssertNotCalled(t, "CrearBadge", mock.Anything)
+	repo.AssertExpectations(t)
+}
+
+func TestBadgeService_CrearValido_LlegaRepositorio(t *testing.T) {
+	repo := new(perfilRepoMock)
+	svc := NuevoBadgeService(repo)
+	badge := models.Badge{
+		Name:        "Colaborador",
+		Description: "Ayuda a otros usuarios",
+		RequiredRep: 100,
+	}
+	guardado := badge
+	guardado.ID = 3
+
+	repo.On("CrearBadge", badge).Return(guardado).Once()
+
+	resultado, err := svc.Crear(badge)
+
+	require.NoError(t, err)
+	require.Equal(t, guardado, resultado)
+	repo.AssertExpectations(t)
+}
+
+func TestBadgeService_ActualizarNoEncontrado_RetornaError(t *testing.T) {
+	repo := new(perfilRepoMock)
+	svc := NuevoBadgeService(repo)
+	badge := models.Badge{
+		Name:        "Colaborador",
+		Description: "Ayuda a otros usuarios",
+	}
+
+	repo.On("ActualizarBadge", 99, badge).Return(models.Badge{}, false).Once()
+
+	_, err := svc.Actualizar(99, badge)
+
+	require.ErrorIs(t, err, ErrNoEncontrado)
+	repo.AssertExpectations(t)
+}
+
+func TestBadgeService_BorrarNoEncontrado_RetornaError(t *testing.T) {
+	repo := new(perfilRepoMock)
+	svc := NuevoBadgeService(repo)
+
+	repo.On("BorrarBadge", 99).Return(false).Once()
+
+	err := svc.Borrar(99)
+
+	require.ErrorIs(t, err, ErrNoEncontrado)
+	repo.AssertExpectations(t)
 }
