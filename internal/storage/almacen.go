@@ -4,7 +4,7 @@ import (
 	"marketplace-api/internal/models"
 )
 
-type Almacen interface {
+type PerfilRepository interface {
 	// MODULO 1
 	// Users
 	ListarUsers() []models.User
@@ -13,8 +13,26 @@ type Almacen interface {
 	ActualizarUser(id int, datos models.User) (models.User, bool)
 	BorrarUser(id int) bool
 
+<<<<<<< HEAD
 	//
+=======
+	// Reviews
+	ListarReviews() []models.Review
+	BuscarReviewPorID(id int) (models.Review, bool)
+	CrearReview(u models.Review) models.Review
+	ActualizarReview(id int, datos models.Review) (models.Review, bool)
+	BorrarReview(id int) bool
 
+	// Badges
+	ListarBadges() []models.Badge
+	BuscarBadgePorID(id int) (models.Badge, bool)
+	CrearBadge(u models.Badge) models.Badge
+	ActualizarBadge(id int, datos models.Badge) (models.Badge, bool)
+	BorrarBadge(id int) bool
+}
+>>>>>>> b13f60a (Guarda cambios antes de cambiar de rama)
+
+type OrdenRepository interface {
 	// MODULO 2
 	// Categorias
 	ListarCategorias() []models.Categoria
@@ -23,20 +41,62 @@ type Almacen interface {
 	ActualizarCategoria(id int, datos models.Categoria) (models.Categoria, bool)
 	BorrarCategoria(id int) bool
 
-	// Productos
+	//Productos
 	ListarProductos() []models.Producto
 	BuscarProductoPorID(id int) (models.Producto, bool)
 	CrearProducto(p models.Producto) models.Producto
 	ActualizarProducto(id int, datos models.Producto) (models.Producto, bool)
 	BorrarProducto(id int) bool
 
-	// Ordenes
+	//Ordenes
 	ListarOrdenes() []models.Orden
 	BuscarOrdenPorID(id int) (models.Orden, bool)
 	CrearOrden(o models.Orden) models.Orden
 	ActualizarOrden(id int, datos models.Orden) (models.Orden, bool)
 	BorrarOrden(id int) bool
-
-	// MODULO 3
-	ListarMessages() []models.Message
 }
+type ComunidadRepository interface {
+	// MODULO 3
+<<<<<<< HEAD
+	ListarMessages() []models.Message
+=======
+	// Messages
+	ListarMessages() []models.Message
+	BuscarMessagePorID(id int) (models.Message, bool)
+	CrearMessage(message models.Message) models.Message
+	ActualizarMessage(id int, datos models.Message) (models.Message, bool)
+	BorrarMessage(id int) bool
+	//// Misiones
+	ListarMissions() []models.Mission
+	BuscarMisionPorID(id int) (models.Mission, bool)
+	CrearMision(mission models.Mission) models.Mission
+	ActualizarMision(id int, datos models.Mission) (models.Mission, bool)
+	BorrarMision(id int) bool
+	//// UserMissions
+	ListarUserMissions() []models.UserMission
+	BuscarUserMissionPorID(id int) (models.UserMission, bool)
+	CrearUserMission(userMission models.UserMission) models.UserMission
+	ActualizarUserMission(id int, datos models.UserMission) (models.UserMission, bool)
+	BorrarUserMission(id int) bool
+>>>>>>> b13f60a (Guarda cambios antes de cambiar de rama)
+}
+type Almacen interface {
+	PerfilRepository
+	OrdenRepository
+	ComunidadRepository
+}
+
+// UserRepository es el contrato de persistencia de usuarios.
+//
+// Ojo: CrearUsuario devuelve error (no comma-ok como el resto). El email
+// duplicado es un fallo real que el AuthService debe poder mapear a 409; aqui
+// la convencion comma-ok ya no alcanza. Es justo el punto que conecta con los
+// errores de dominio de S12.
+type UserRepository interface {
+	CrearUsuario(u models.Usuario) (models.Usuario, error)
+	BuscarUsuarioPorEmail(email string) (models.Usuario, bool)
+}
+
+// Chequeo en tiempo de compilación: si Memoria dejara de cumplir Almacen,
+// el proyecto NO compila. Red de seguridad opcional.
+var _ Almacen = (*Memoria)(nil)
