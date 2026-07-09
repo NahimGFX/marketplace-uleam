@@ -20,9 +20,9 @@ func MarketplaceRoutes(
 		// Categorías
 		r.Get("/categorias", s.ListarCategorias)
 		r.Get("/categorias/{id}", s.ObtenerCategoria)
-		r.Post("/categorias", s.CrearCategoria)
-		r.Put("/categorias/{id}", s.ActualizarCategoria)
-		r.Delete("/categorias/{id}", s.BorrarCategoria)
+		r.With(middleware.RolPermitido("admin")).Post("/categorias", s.CrearCategoria)
+		r.With(middleware.RolPermitido("admin")).Put("/categorias/{id}", s.ActualizarCategoria)
+		r.With(middleware.RolPermitido("admin")).Delete("/categorias/{id}", s.BorrarCategoria)
 
 		// Productos
 		r.Get("/productos", s.ListarProductos)

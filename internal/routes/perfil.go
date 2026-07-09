@@ -29,8 +29,8 @@ func PerfilRoutes(r chi.Router, s *handlers.Server, authSvc *service.AuthService
 		// Badges
 		r.Get("/badges", s.ListarBadges)
 		r.Get("/badges/{id}", s.ObtenerBadge)
-		r.Post("/badges", s.CrearBadge)
-		r.Put("/badges/{id}", s.ActualizarBadge)
-		r.Delete("/badges/{id}", s.BorrarBadge)
+		r.With(middleware.RolPermitido("admin")).Post("/badges", s.CrearBadge)
+		r.With(middleware.RolPermitido("admin")).Put("/badges/{id}", s.ActualizarBadge)
+		r.With(middleware.RolPermitido("admin")).Delete("/badges/{id}", s.BorrarBadge)
 	})
 }

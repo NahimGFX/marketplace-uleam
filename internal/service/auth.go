@@ -17,16 +17,13 @@ const (
 	jwtDuracionDefecto = 24 * time.Hour
 )
 
-// Claims es el contenido del JWT: el ID del usuario + los campos estandar (exp, iat).
+// Claims es el contenido del JWT: ID del usuario, rol y campos estandar.
 type Claims struct {
-	UsuarioID int `json:"uid"`
+	UsuarioID int    `json:"uid"`
+	Role      string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-// AuthService concentra TODA la logica de autenticacion: hashing de contrasenas
-// (bcrypt) y generacion/validacion de JWT. El handler y el middleware no saben
-// de bcrypt ni de firmas: solo llaman a este servicio. Esa es la razon de ser
-// de la capa de servicio.
 type AuthService struct {
 	repo        storage.UserRepository
 	jwtSecreto  []byte
@@ -51,7 +48,6 @@ func NuevoAuthServiceConJWT(repo storage.UserRepository, secreto string, duracio
 	}
 }
 
-// Registrar crea un usuario nuevo en users con la contrasena hasheada (bcrypt).
 func (s *AuthService) Registrar(email, password string) (models.User, error) {
 	email = strings.TrimSpace(strings.ToLower(email))
 	password = strings.TrimSpace(password)
@@ -71,6 +67,7 @@ func (s *AuthService) Registrar(email, password string) (models.User, error) {
 		Name:       nombreDesdeEmail(email),
 		Email:      email,
 		Password:   string(hash),
+		Role:       "estudiante",
 		Level:      1,
 		Reputation: 0,
 	})
@@ -82,7 +79,6 @@ func (s *AuthService) Registrar(email, password string) (models.User, error) {
 	return u, nil
 }
 
-// Login verifica las credenciales y, si son validas, devuelve un JWT firmado.
 func (s *AuthService) Login(email, password string) (string, error) {
 	email = strings.TrimSpace(strings.ToLower(email))
 	password = strings.TrimSpace(password)
@@ -107,17 +103,16 @@ func (s *AuthService) passwordValido(u models.User, password string) bool {
 		return false
 	}
 
-	// Compatibilidad con datos antiguos guardados en texto plano.
 	if hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost); err == nil {
 		_ = s.repo.ActualizarPasswordUsuario(u.ID, string(hash))
 	}
 	return true
 }
 
-// generarToken arma y firma el JWT con el ID del usuario y la expiracion.
 func (s *AuthService) generarToken(u models.User) (string, error) {
 	claims := Claims{
 		UsuarioID: u.ID,
+		Role:      rolNormalizado(u.Role),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.jwtDuracion)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -127,9 +122,23 @@ func (s *AuthService) generarToken(u models.User) (string, error) {
 	return token.SignedString(s.jwtSecreto)
 }
 
-// ValidarToken verifica firma y expiracion, y devuelve el ID del usuario.
-// Lo usa el middleware de autenticacion: el JWT vive aqui, no en el middleware.
 func (s *AuthService) ValidarToken(tokenStr string) (int, error) {
+	claims, err := s.validarClaims(tokenStr)
+	if err != nil {
+		return 0, err
+	}
+	return claims.UsuarioID, nil
+}
+
+func (s *AuthService) RolDesdeToken(tokenStr string) (string, error) {
+	claims, err := s.validarClaims(tokenStr)
+	if err != nil {
+		return "", err
+	}
+	return rolNormalizado(claims.Role), nil
+}
+
+func (s *AuthService) validarClaims(tokenStr string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrCredencialesInvalidas
@@ -137,13 +146,21 @@ func (s *AuthService) ValidarToken(tokenStr string) (int, error) {
 		return s.jwtSecreto, nil
 	})
 	if err != nil || !token.Valid {
-		return 0, ErrCredencialesInvalidas
+		return nil, ErrCredencialesInvalidas
 	}
 	claims, ok := token.Claims.(*Claims)
 	if !ok {
-		return 0, ErrCredencialesInvalidas
+		return nil, ErrCredencialesInvalidas
 	}
-	return claims.UsuarioID, nil
+	return claims, nil
+}
+
+func rolNormalizado(role string) string {
+	role = strings.TrimSpace(strings.ToLower(role))
+	if role == "" {
+		return "estudiante"
+	}
+	return role
 }
 
 func nombreDesdeEmail(email string) string {

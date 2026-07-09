@@ -1,0 +1,290 @@
+{
+  "info": {
+    "name": "Marketplace ULEAM - Hito 3",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api/v1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth - Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"juan@uleam.edu.ec\",\n  \"password\": \"123456\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data.token) pm.collectionVariables.set('token', data.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Register estudiante",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/auth/register",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"nuevo@uleam.edu.ec\",\n  \"password\": \"123456\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Perfil - Listar usuarios",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/users",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Perfil - Crear review",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/reviews",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "reviews"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reviewer_id\": 1,\n  \"reviewed_id\": 2,\n  \"rating\": 5,\n  \"comment\": \"Excelente intercambio\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Marketplace - Listar categorias",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/categorias",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "categorias"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Marketplace - Crear producto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/productos",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "productos"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Libro de Algebra\",\n  \"descripcion\": \"Texto usado en buen estado\",\n  \"precio\": 18.5,\n  \"categoria_id\": 1\n}"
+        }
+      }
+    },
+    {
+      "name": "Marketplace - Crear orden",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/ordenes",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "ordenes"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"producto_id\": 1,\n  \"comprador_id\": 2,\n  \"estado\": \"Pendiente\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Comunidad - Crear mensaje",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/messages",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "messages"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sender_id\": 1,\n  \"receiver_id\": 2,\n  \"content\": \"Hola, me interesa tu producto\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Comunidad - Listar misiones",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/missions",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "missions"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Admin - Crear categoria",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/categorias",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "categorias"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Servicios academicos\"\n}"
+        }
+      }
+    }
+  ]
+}

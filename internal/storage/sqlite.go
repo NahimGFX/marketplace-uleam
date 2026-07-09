@@ -420,17 +420,19 @@ func (a *AlmacenSQLite) SembrarSiVacio() {
 	a.db.Model(&models.User{}).Count(&n)
 	if n == 0 {
 		users := []models.User{
-			{Name: "Juan Perez", Email: "juan@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 20},
-			{Name: "Maria Lopez", Email: "maria@uleam.edu.ec", Password: "123456", Level: 2, Reputation: 75},
-			{Name: "Carlos Zambrano", Email: "carlos@uleam.edu.ec", Password: "123456", Level: 3, Reputation: 150},
-			{Name: "Andrea Vera", Email: "andrea@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 30},
-			{Name: "Luis Mendoza", Email: "luis@uleam.edu.ec", Password: "123456", Level: 4, Reputation: 220},
-			{Name: "Sofia Cedeño", Email: "sofia@uleam.edu.ec", Password: "123456", Level: 2, Reputation: 90},
-			{Name: "Kevin Alcivar", Email: "kevin@uleam.edu.ec", Password: "123456", Level: 1, Reputation: 15},
+			{Name: "Juan Perez", Email: "juan@uleam.edu.ec", Password: "123456", Role: "admin", Level: 1, Reputation: 20},
+			{Name: "Maria Lopez", Email: "maria@uleam.edu.ec", Password: "123456", Role: "estudiante", Level: 2, Reputation: 75},
+			{Name: "Carlos Zambrano", Email: "carlos@uleam.edu.ec", Password: "123456", Role: "estudiante", Level: 3, Reputation: 150},
+			{Name: "Andrea Vera", Email: "andrea@uleam.edu.ec", Password: "123456", Role: "estudiante", Level: 1, Reputation: 30},
+			{Name: "Luis Mendoza", Email: "luis@uleam.edu.ec", Password: "123456", Role: "estudiante", Level: 4, Reputation: 220},
+			{Name: "Sofia Cedeño", Email: "sofia@uleam.edu.ec", Password: "123456", Role: "estudiante", Level: 2, Reputation: 90},
+			{Name: "Kevin Alcivar", Email: "kevin@uleam.edu.ec", Password: "123456", Role: "estudiante", Level: 1, Reputation: 15},
 		}
 
 		a.db.Create(&users)
 	}
+	a.db.Model(&models.User{}).Where("role = '' OR role IS NULL").Update("role", "estudiante")
+	a.db.Model(&models.User{}).Where("email = ?", "juan@uleam.edu.ec").Update("role", "admin")
 
 	// =========================
 	// REVIEWS

@@ -25,9 +25,9 @@ func ComunidadRoutes(
 
 		r.Get("/missions", s.ListarMissions)
 		r.Get("/missions/{id}", s.ObtenerMision)
-		r.Post("/missions", s.CrearMision)
-		r.Put("/missions/{id}", s.ActualizarMision)
-		r.Delete("/missions/{id}", s.BorrarMision)
+		r.With(middleware.RolPermitido("admin")).Post("/missions", s.CrearMision)
+		r.With(middleware.RolPermitido("admin")).Put("/missions/{id}", s.ActualizarMision)
+		r.With(middleware.RolPermitido("admin")).Delete("/missions/{id}", s.BorrarMision)
 
 		r.Get("/usermissions", s.ListarUsermissions)
 		r.Get("/usermissions/{id}", s.ObtenerUserMission)

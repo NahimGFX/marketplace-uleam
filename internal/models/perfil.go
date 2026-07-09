@@ -3,10 +3,11 @@ package models
 type User struct {
 	ID         int    `json:"id" gorm:"primaryKey"`
 	Name       string `json:"name"`
-	Email      string `json:"email" gorm:"unique" `
+	Email      string `json:"email" gorm:"unique"`
 	Password   string `json:"password"`
 	Level      int    `json:"level"`
 	Reputation int    `json:"reputation"`
+	Role       string `json:"role" gorm:"default:estudiante"`
 }
 
 type Review struct {

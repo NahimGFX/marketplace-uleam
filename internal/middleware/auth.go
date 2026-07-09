@@ -7,15 +7,11 @@ import (
 	"strings"
 )
 
-// claveContexto es un tipo privado para la clave del context y evitar colisiones.
 type claveContexto string
 
-// ClaveUsuarioID es la clave bajo la que se guarda el ID del usuario autenticado.
 const ClaveUsuarioID claveContexto = "usuarioID"
+const ClaveRol claveContexto = "rol"
 
-// Auth construye un middleware que exige un JWT valido en el header
-// Authorization: Bearer <token>. Delega la validacion al AuthService: el
-// middleware NO sabe de firmas ni de claims, solo de HTTP.
 func Auth(auth *service.AuthService) func(http.Handler) http.Handler {
 	return func(siguiente http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -30,8 +26,33 @@ func Auth(auth *service.AuthService) func(http.Handler) http.Handler {
 				responderNoAutorizado(w)
 				return
 			}
+			rol, err := auth.RolDesdeToken(partes[1])
+			if err != nil {
+				responderNoAutorizado(w)
+				return
+			}
 			ctx := context.WithValue(r.Context(), ClaveUsuarioID, usuarioID)
+			ctx = context.WithValue(ctx, ClaveRol, rol)
 			siguiente.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func RolPermitido(roles ...string) func(http.Handler) http.Handler {
+	permitidos := map[string]bool{}
+	for _, role := range roles {
+		permitidos[strings.ToLower(strings.TrimSpace(role))] = true
+	}
+	return func(siguiente http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			rol, _ := r.Context().Value(ClaveRol).(string)
+			if !permitidos[strings.ToLower(strings.TrimSpace(rol))] {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusForbidden)
+				_, _ = w.Write([]byte(`{"error":"rol no autorizado"}`))
+				return
+			}
+			siguiente.ServeHTTP(w, r)
 		})
 	}
 }
