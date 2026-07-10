@@ -37,7 +37,8 @@ flowchart LR
 
 ## Estructura del proyecto
 
-textmarketplace-uleam/
+```text
+marketplace-uleam/
 ├── cmd/
 │   └── marketplace-api/
 │       └── main.go              # Punto de entrada de la API
@@ -101,3 +102,4 @@ textmarketplace-uleam/
 ├── go.mod / go.sum
 ├── sqlc.yml
 └── README.md
+```

@@ -120,7 +120,8 @@ HTTP request -> routes -> handlers -> services -> repositories -> GORM -> Postgr
 
 Estructura del proyecto
 
-textmarketplace-uleam/
+```text
+marketplace-uleam/
 ├── cmd/
 │   └── marketplace-api/
 │       └── main.go              # Punto de entrada de la API
@@ -184,6 +185,7 @@ textmarketplace-uleam/
 ├── go.mod / go.sum
 ├── sqlc.yml
 └── README.md
+```
 
 Ver tambien: `docs/arquitectura.md`.
 
