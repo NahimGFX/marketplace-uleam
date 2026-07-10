@@ -10,4 +10,4 @@ Planificariamos antes los nombres de endpoints, structs y tablas para evitar inc
 
 ## Proximos pasos del producto
 
-El siguiente paso seria construir un frontend sencillo para estudiantes, agregar filtros de productos por categoria/precio, registrar imagenes de productos, mejorar la mensajeria entre compradores y vendedores, y crear un panel admin para categorias, insignias y misiones. Tambien se podria publicar la API en un hosting con PostgreSQL administrado y variables de entorno seguras.
+El siguiente paso seria construir un frontend sencillo para estudiantes, agregar filtros de productos por categoria/precio, registrar imagenes de productos, mejorar la mensajeria entre compradores y vendedores, y crear un panel admin para categorias, insignias y misiones. Tambien se podria publicar la API en un hosting con PostgreSQL.
